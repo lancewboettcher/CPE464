@@ -32,7 +32,6 @@
 #define ARP_REQUEST 1
 #define ARP_REPLY 2
 
-
 void sniffTraceFile(char *filename);
 void sniffIP(const u_char *loc);
 void sniffARP(const u_char *loc);
@@ -64,6 +63,8 @@ void sniffTraceFile(char *filename) {
    struct ethernet *ethernetHeader;
    int packetNumber = 1;
 
+   int nextOut;
+
    handle = pcap_open_offline(filename, errorString);
 
    if (handle == NULL) {
@@ -71,7 +72,10 @@ void sniffTraceFile(char *filename) {
       exit(-1);
    }
 
-   while (pcap_next_ex(handle, &header, &packet) == 1) {
+   while (nextOut = pcap_next_ex(handle, &header, &packet) == 1) {
+
+      printf("NextOut: %d\n", nextOut);
+
       printf("Packet number: %d Packet Len: %d\n\n", 
             packetNumber++, header->len);
 
