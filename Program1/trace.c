@@ -79,8 +79,8 @@ void sniffTraceFile(char *filename) {
       ethernetHeader = (struct ethernet *) packet;
 
       printf("\tEthernet Header\n\t\tDest MAC: %s\n\t\tSource MAC: %s\n",
-            ether_ntoa(&(ethernetHeader->dest)), 
-            ether_ntoa(&(ethernetHeader->src)));
+            ether_ntoa(&ethernetHeader->dest), 
+            ether_ntoa(&ethernetHeader->src));
 
       if (ethernetHeader->type == TYPE_IP) {
          printf("\t\tType: IP\n\n");
