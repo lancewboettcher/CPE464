@@ -11,7 +11,7 @@ struct ethernet {
 
    struct ether_addr dest;
    struct ether_addr src;
-   u_short type;
+   uint16_t type;
 
 }__attribute__((packed));
 
@@ -19,37 +19,14 @@ struct ip {
 
    u_char versionAndLength;
    u_char tos;
-   u_short size;
-   u_short id;
-   u_short fragOffset;
+   uint16_t size;
+   uint16_t id;
+   uint16_t fragOffset;
    u_char ttl;
    u_char protocol;
-   u_short checksum;
+   uint16_t checksum;
    struct in_addr src;
    struct in_addr dest;
-
-}__attribute__((packed));
-
-struct tcp {
-
-   u_short sourcePort;
-   u_short destPort;
-   uint32_t sequenceNum;
-   uint32_t ackNum;
-   u_char dataOffset;
-   u_char flags;
-   u_short window;
-   u_short checksum;
-   u_short urgent;
-
-}__attribute__((packed));
-
-struct udp {
-
-   uint16_t src;
-   uint16_t dest;
-   uint16_t length;
-   uint16_t checksum;
 
 }__attribute__((packed));
 
@@ -60,10 +37,10 @@ struct arp {
    u_char hardwareAddressLength;
    u_char protocolAddressLength;
    uint16_t opcode;
-   struct ether_addr senderHardwareAddress;
-   struct in_addr senderProtocolAddress;
-   struct ether_addr targetHardwareAddress;
-   struct in_addr targetProtocolAddress;
+   struct ether_addr senderMAC;
+   struct in_addr senderIP;
+   struct ether_addr targetMAC;
+   struct in_addr targetIP;
 
 }__attribute__((packed));
 
