@@ -4,13 +4,17 @@
  * Lance Boettcher
  */
 
-#define TYPE_IP 0x0800
-#define TYPE_ARP 0x0806
+#define TYPE_IP 8
+#define TYPE_ARP 1544
 
 struct ethernet {
 
-   struct ether_addr dest;
-   struct ether_addr src;
+ //  const struct ether_addr dest;
+ //  const struct ether_addr src;
+   
+   u_char dest[6];
+   u_char src[6];
+ 
    uint16_t type;
 
 }__attribute__((packed));

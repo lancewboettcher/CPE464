@@ -26,11 +26,11 @@
 #define TCP_OFFSET_LOC 4
 #define ACK_FLAG_LOC 4
 
-#define ICMP_REQUEST 8
-#define ICMP_REPLY 0
+#define ICMP_REQUEST 0
+#define ICMP_REPLY 8
 
-#define ARP_REQUEST 256
-#define ARP_REPLY 512
+#define ARP_REQUEST 1
+#define ARP_REPLY 2
 
 void sniffTraceFile(char *filename);
 void sniffIP(const u_char *loc);
@@ -74,14 +74,7 @@ void sniffTraceFile(char *filename) {
 
    while (nextOut = pcap_next_ex(handle, &header, &packet) == 1) {
 
-   /*      int i = 0;
-         for (i = 0; i < 1000; i++) {
-            if (*(unsigned short *)(packet +ETHERNET_LENGTH + i) == 1663) {
-               printf("**FOUND 1663 at %d\n", i);
-            } 
-         }
-
-*/
+      printf("NextOut: %d\n", nextOut);
 
       printf("Packet number: %d Packet Len: %d\n\n", 
             packetNumber++, header->len);
@@ -89,11 +82,9 @@ void sniffTraceFile(char *filename) {
       /* Ethernet Packet is always first */ 
       ethernetHeader = (struct ethernet *) packet;
 
-      printf("\tEthernet Header\n");
-      printf("\t\tDest MAC: %s\n", 
-            ether_ntoa((const struct ether_addr *)ethernetHeader->dest)); 
-      printf("\t\tSource MAC: %s\n", 
-            ether_ntoa((const struct ether_addr *)ethernetHeader->src));
+      printf("\tEthernet Header\n\t\tDest MAC: %s\n\t\tSource MAC: %s\n",
+            ether_ntoa(&ethernetHeader->dest), 
+            ether_ntoa(&ethernetHeader->src));
 
       if (ethernetHeader->type == TYPE_IP) {
          printf("\t\tType: IP\n\n");
@@ -125,15 +116,15 @@ void sniffIP(const u_char *loc) {
    printf("\t\tIP Version: %u\n", 
          ipHeader->versionAndLength >> IP_VERSION_LOC);
    printf("\t\tHeader Len (bytes): %u\n", 
-         (ipHeader->versionAndLength << 2) & 0x1F);
+         ipHeader->versionAndLength & 0x0F);
 
    /* 
     * TOS
     * 0 | DSCP | 5 | ECN | 7 
     */ 
-   printf("\t\tTOS subfields:\n");
-   printf("\t\t\tDiffserv bits: %u\n", ipHeader->tos >> DSCP_LOC);
-   printf("\t\t\tECN bits: %u\n", ipHeader->tos & 0x03);
+   printf("\tTOS subfields:\n");
+   printf("\t\tDiffserv bits: %u\n", ipHeader->tos >> DSCP_LOC);
+   printf("\t\tECN bits: %u\n", ipHeader->tos & 0x03);
    
    /* TTL */ 
    printf("\t\tTTL: %u\n", ipHeader->ttl);
@@ -162,7 +153,7 @@ void sniffIP(const u_char *loc) {
 
 void sniffARP(const u_char *loc) {
 
-   printf("\tARP header\n");
+   printf("\tARP heder\n");
 
    struct arp *arpHeader = (struct arp *) loc;
 
@@ -170,9 +161,7 @@ void sniffARP(const u_char *loc) {
    if (arpHeader->opcode == ARP_REQUEST)
       printf("\t\tOpcode: Request\n");
    else if (arpHeader->opcode == ARP_REPLY) 
-      printf("\t\tOpcode: Reply\n");  
-   else 
-      printf("\t\tOpcode: Unknown (%hu)\n", arpHeader->opcode);
+      printf("\t\tOpcode: Reply\n");   
    
    /* Sender MAC */ 
    printf("\t\tSender MAC: %s\n",
@@ -186,7 +175,7 @@ void sniffARP(const u_char *loc) {
          ether_ntoa(&(arpHeader->targetMAC)));
    
    /* Target IP */ 
-   printf("\t\tTarget IP: %s\n\n", inet_ntoa(arpHeader->targetIP));
+   printf("\t\tSender IP: %s\n\n", inet_ntoa(arpHeader->targetIP));
 }
 
 void sniffUnknown(const u_char *loc) {
@@ -209,16 +198,7 @@ void sniffProtocol(u_char type, const u_char *loc) {
          printf("\tTCP Header\n");
 
          struct tcp *tcpHeader = (struct tcp *) loc;
-   
-    /*     int i = 0;
-         for (i = 0; i < 1000; i++) {
-            if (*(unsigned short *)(loc + i) == 1663) {
-               printf("**FOUND 1663 at %d\n", i);
-            } 
-         }
-         printf("SRC PORT: %hu\n", *(unsigned short *)(loc + 20 * 4));
-         printf("DEST PORT: %hu\n", *(unsigned short *)(loc + 2));
-*/
+
          sniffTCP(tcpHeader);
 
          break;
@@ -248,8 +228,8 @@ void sniffICMP(struct icmp *icmpHeader) {
 
 void sniffTCP(struct tcp *tcpHeader) {
 
-   printf("\t\tSource Port: %s\n", ntohs(tcpHeader->src));
-   printf("\t\tDest Port: %s\n", ntohs(tcpHeader->dest)); 
+   printf("\t\tSource Port: %u\n", tcpHeader->src);
+   printf("\t\tDest Port: %u\n", tcpHeader->dest); 
    printf("\t\tSequence Number: %u\n", tcpHeader->sequenceNumber);
    printf("\t\tACK Number: %u\n", tcpHeader->ackNumber);
    printf("\t\tData Offset (bytes): %u\n", 
@@ -281,7 +261,7 @@ void sniffUDP(struct udp *udpHeader) {
 
 const char *yesOrNo(u_char val) {
    if (val == 0x01)
-      return "Yes";
+      return "yes";
    else 
-      return "No";
+      return "no";
 }
