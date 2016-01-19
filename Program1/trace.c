@@ -47,7 +47,6 @@
 void sniffTraceFile(char *filename);
 void sniffIP(const u_char *loc);
 void sniffARP(const u_char *loc);
-void sniffUnknown(const u_char *loc);
 void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo);
 void sniffICMP(struct icmp *icmpHeader);
 void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo);
@@ -109,7 +108,6 @@ void sniffTraceFile(char *filename) {
       }
       else {
          printf("\t\tType: Unknown\n\n");
-         sniffUnknown(packet + ETHERNET_LENGTH);
       }
    }   
 
@@ -206,11 +204,6 @@ void sniffARP(const u_char *loc) {
    printf("\t\tTarget IP: %s\n\n", inet_ntoa(arpHeader->targetIP));
 }
 
-void sniffUnknown(const u_char *loc) {
-
-
-}
-
 void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo) {
 
    switch (type) {
@@ -225,7 +218,7 @@ void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo) {
       case TCP_CODE: 
          printf("\tTCP Header\n");
 
-         struct tcp *tcpHeader = (struct tcp *) (loc + 0);
+         struct tcp *tcpHeader = (struct tcp *) loc;
    
          sniffTCP(tcpHeader, pseudo);
 
@@ -243,6 +236,8 @@ void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo) {
 }
 
 void sniffICMP(struct icmp *icmpHeader) {
+
+   //printf("ICMP type: %u \ncode: %u\ncheck: %hu\n\n", icmpHeader->type, icmpHeader->code, icmpHeader->checksum);
 
    if (icmpHeader->type == ICMP_REQUEST)
       printf("\t\tType: Request\n");
@@ -288,7 +283,7 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    printf("\t\tWindow Size: %hu\n", ntohs(tcpHeader->windowSize));
   
    /* Checksum */  
-   pseudo.src = tcpHeader->src;
+ /*  pseudo.src = tcpHeader->src;
    pseudo.dest = tcpHeader->dest;
    pseudo.sequenceNumber = tcpHeader->sequenceNumber;
    pseudo.ackNumber = tcpHeader->ackNumber;
@@ -298,14 +293,17 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    pseudo.checksum = tcpHeader->checksum;
    pseudo.urgent = tcpHeader->urgent;
    pseudo.padding = tcpHeader->padding;
-/*
-   printf("\n\nCHECKSUM\nlength: %d\npsh length: %hu\n\n", 
-      ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH, ntohs(pseudo.tcpLength));
 */
 
- //  memcpy((char *)&pseudo + TCP_PSEUDO_LENGTH, tcpHeader, TCP_LENGTH);
+   u_char *checksum = calloc(65535, 1);
 
-   if (in_cksum((unsigned short *)&pseudo, ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
+   memcpy(checksum, &pseudo, TCP_PSEUDO_LENGTH);
+
+   memcpy(&checksum[TCP_PSEUDO_LENGTH], tcpHeader, ntohs(pseudo.tcpLength));
+
+   //printf("\n\nCHECKSUM**\nlength: %d\n psh Length: %hu\n\n", ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH, ntohs(pseudo.tcpLength));
+
+   if (in_cksum((unsigned short *)checksum, ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
       printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(tcpHeader->checksum));
    else
       printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(tcpHeader->checksum));

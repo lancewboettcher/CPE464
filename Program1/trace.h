@@ -75,7 +75,7 @@ struct tcpPseudo {
    u_char reserved;
    u_char protocol;
    uint16_t tcpLength;
-
+/*
    uint16_t src;
    uint16_t dest;
    uint32_t sequenceNumber;
@@ -86,7 +86,7 @@ struct tcpPseudo {
    uint16_t checksum; 
    uint16_t urgent; 
    uint32_t padding;
-
+*/
 }__attribute__((packed));
 
 struct udp {
