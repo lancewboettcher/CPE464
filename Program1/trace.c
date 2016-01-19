@@ -82,7 +82,7 @@ void sniffTraceFile(char *filename) {
 
    while (nextOut = pcap_next_ex(handle, &header, &packet) == 1) {
 
-      printf("Packet number: %d Packet Len: %d\n\n", 
+      printf("\nPacket number: %d  Packet Len: %d\n\n", 
             packetNumber++, header->len);
 
       /* Ethernet Packet is always first */ 
@@ -116,23 +116,24 @@ void sniffIP(const u_char *loc) {
    printf("\tIP Header\n");
 
    struct ip *ipHeader = (struct ip *) loc;
+   int headerLength; 
 
    /* 
     * Version and Length
     * 0 | IP Version | 4 | IP Header Length | 7 
     */ 
+   headerLength = (ipHeader->versionAndLength << 2) & 0x1F;
    printf("\t\tIP Version: %u\n", 
          ipHeader->versionAndLength >> IP_VERSION_LOC);
-   printf("\t\tHeader Len (bytes): %u\n", 
-         (ipHeader->versionAndLength << 2) & 0x1F);
+   printf("\t\tHeader Len (bytes): %u\n", headerLength);
 
    /* 
     * TOS
     * 0 | DSCP | 5 | ECN | 7 
     */ 
    printf("\t\tTOS subfields:\n");
-   printf("\t\t\tDiffserv bits: %u\n", ipHeader->tos >> DSCP_LOC);
-   printf("\t\t\tECN bits: %u\n", ipHeader->tos & 0x03);
+   printf("\t\t   Diffserv bits: %u\n", ipHeader->tos >> DSCP_LOC);
+   printf("\t\t   ECN bits: %u\n", ipHeader->tos & 0x03);
    
    /* TTL */ 
    printf("\t\tTTL: %u\n", ipHeader->ttl);
@@ -148,7 +149,10 @@ void sniffIP(const u_char *loc) {
       printf("\t\tProtocol: Unknown\n");
 
    /* Checksum */ 
-
+   if (in_cksum((unsigned short *) ipHeader, headerLength * 4) == 0)
+      printf("\t\tChecksum: Correct (0x%hx)\n", ntohs(ipHeader->checksum));
+   else
+      printf("\t\tChecksum: Incorrect (0x%hx)\n", ntohs(ipHeader->checksum));
 
    /* Sender IP */ 
    printf("\t\tSender IP: %s\n", inet_ntoa(ipHeader->src));
@@ -209,15 +213,6 @@ void sniffProtocol(u_char type, const u_char *loc) {
 
          struct tcp *tcpHeader = (struct tcp *) (loc + 0);
    
-    /*     int i = 0;
-         for (i = 0; i < 1000; i++) {
-            if (*(unsigned short *)(loc + i) == 1663) {
-               printf("**FOUND 1663 at %d\n", i);
-            } 
-         }
-         printf("SRC PORT: %hu\n", *(unsigned short *)(loc + 20 * 4));
-         printf("DEST PORT: %hu\n", *(unsigned short *)(loc + 2));
-*/
          sniffTCP(tcpHeader);
 
          break;
@@ -237,11 +232,11 @@ void sniffICMP(struct icmp *icmpHeader) {
 
    /* Type */ 
    if (icmpHeader->type == ICMP_REQUEST)
-      printf("\t\tType: Request\n\n");
+      printf("\t\tType: Request\n");
    else if (icmpHeader->type == ICMP_REPLY)
-      printf("\t\tType: Reply\n\n");
+      printf("\t\tType: Reply\n");
    else 
-      printf("\t\tType: Other-Unknown\n\n");
+      printf("\t\tType: Other-Unknown\n");
 
 }
 
@@ -283,7 +278,7 @@ void sniffUDP(struct udp *udpHeader) {
    if (strlen(dest) == 0)
       printf("\t\tDest Port: %hu\n\n", ntohs(udpHeader->dest));
    else 
-      printf("\t\tDest Port: %s\n\n", dest);
+      printf("\t\tDest Port: %s\n", dest);
 
 }
 
