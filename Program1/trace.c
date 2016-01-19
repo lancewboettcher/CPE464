@@ -18,11 +18,16 @@
 
 #define ETHERNET_LENGTH 14
 #define IP_LENGTH 20
+#define TCP_LENGTH 20
+#define TCP_PSEUDO_LENGTH 12
+
 #define IP_VERSION_LOC 4
 #define DSCP_LOC 5
+
 #define ICMP_CODE 1
 #define TCP_CODE 6
 #define UDP_CODE 17
+
 #define TCP_OFFSET_LOC 2
 #define ACK_FLAG_LOC 4
 
@@ -43,9 +48,9 @@ void sniffTraceFile(char *filename);
 void sniffIP(const u_char *loc);
 void sniffARP(const u_char *loc);
 void sniffUnknown(const u_char *loc);
-void sniffProtocol(u_char type, const u_char *loc);
+void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo);
 void sniffICMP(struct icmp *icmpHeader);
-void sniffTCP(struct tcp *tcpHeader);
+void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo);
 void sniffUDP(struct udp *udpHeader);
 const char *getCommonPorts(uint16_t portNumber);
 const char *yesOrNo(u_char val);
@@ -122,7 +127,7 @@ void sniffIP(const u_char *loc) {
     * Version and Length
     * 0 | IP Version | 4 | IP Header Length | 7 
     */ 
-   headerLength = (ipHeader->versionAndLength << 2) & 0x1F;
+   headerLength = (ipHeader->versionAndLength << 2) & 0x3F;
    printf("\t\tIP Version: %u\n", 
          ipHeader->versionAndLength >> IP_VERSION_LOC);
    printf("\t\tHeader Len (bytes): %u\n", headerLength);
@@ -132,7 +137,7 @@ void sniffIP(const u_char *loc) {
     * 0 | DSCP | 5 | ECN | 7 
     */ 
    printf("\t\tTOS subfields:\n");
-   printf("\t\t   Diffserv bits: %u\n", ipHeader->tos >> DSCP_LOC);
+   printf("\t\t   Diffserv bits: %u\n", (ipHeader->tos >> DSCP_LOC) & 0x3F);
    printf("\t\t   ECN bits: %u\n", ipHeader->tos & 0x03);
    
    /* TTL */ 
@@ -149,10 +154,10 @@ void sniffIP(const u_char *loc) {
       printf("\t\tProtocol: Unknown\n");
 
    /* Checksum */ 
-   if (in_cksum((unsigned short *) ipHeader, headerLength * 4) == 0)
-      printf("\t\tChecksum: Correct (0x%hx)\n", ntohs(ipHeader->checksum));
+   if (in_cksum((unsigned short *) ipHeader, IP_LENGTH) == 0)
+      printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(ipHeader->checksum));
    else
-      printf("\t\tChecksum: Incorrect (0x%hx)\n", ntohs(ipHeader->checksum));
+      printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(ipHeader->checksum));
 
    /* Sender IP */ 
    printf("\t\tSender IP: %s\n", inet_ntoa(ipHeader->src));
@@ -160,7 +165,14 @@ void sniffIP(const u_char *loc) {
    /* Dest IP */ 
    printf("\t\tDest IP: %s\n\n", inet_ntoa(ipHeader->dest));
 
-   sniffProtocol(ipHeader->protocol, loc + IP_LENGTH);
+   /* Set info for TCP Pseudo Header */ 
+   struct tcpPseudo pseudo;
+   pseudo.ipSrc = ipHeader->src;
+   pseudo.ipDest = ipHeader->dest;
+   pseudo.reserved = 0;
+   pseudo.protocol = ipHeader->protocol; 
+
+   sniffProtocol(ipHeader->protocol, loc + IP_LENGTH, pseudo);
 }
 
 void sniffARP(const u_char *loc) {
@@ -197,7 +209,7 @@ void sniffUnknown(const u_char *loc) {
 
 }
 
-void sniffProtocol(u_char type, const u_char *loc) {
+void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo) {
 
    switch (type) {
       case ICMP_CODE: 
@@ -213,11 +225,11 @@ void sniffProtocol(u_char type, const u_char *loc) {
 
          struct tcp *tcpHeader = (struct tcp *) (loc + 0);
    
-         sniffTCP(tcpHeader);
+         sniffTCP(tcpHeader, pseudo);
 
          break;
       case UDP_CODE: 
-         printf("UDP Header\n");
+         printf("\tUDP Header\n");
 
          struct udp *udpHeader = (struct udp *) loc;
 
@@ -230,24 +242,34 @@ void sniffProtocol(u_char type, const u_char *loc) {
 
 void sniffICMP(struct icmp *icmpHeader) {
 
-   /* Type */ 
    if (icmpHeader->type == ICMP_REQUEST)
       printf("\t\tType: Request\n");
    else if (icmpHeader->type == ICMP_REPLY)
       printf("\t\tType: Reply\n");
    else 
-      printf("\t\tType: Other-Unknown\n");
+      printf("\t\tType: %u\n", icmpHeader->type);
 
 }
 
-void sniffTCP(struct tcp *tcpHeader) {
+void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
+   /* Ports */ 
+   const char *src = getCommonPorts(ntohs(tcpHeader->src));
+   const char *dest = getCommonPorts(ntohs(tcpHeader->dest));
 
-   printf("\t\tSource Port: %hu\n", ntohs(tcpHeader->src));
-   printf("\t\tDest Port: %hu\n", ntohs(tcpHeader->dest)); 
+   if (strlen(src) == 0)    
+      printf("\t\tSource Port:  %hu\n", ntohs(tcpHeader->src));
+   else 
+      printf("\t\tSource Port:  %s\n", src);
+   if (strlen(dest) == 0)
+      printf("\t\tDest Port:  %hu\n", ntohs(tcpHeader->dest));
+   else 
+      printf("\t\tDest Port:  %s\n", dest);
+   
    printf("\t\tSequence Number: %u\n", ntohl(tcpHeader->sequenceNumber));
    printf("\t\tACK Number: %u\n", ntohl(tcpHeader->ackNumber));
+   
    printf("\t\tData Offset (bytes): %u\n", 
-         (tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x1F); 
+         (tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x3F); 
 
    printf("\t\tSYN Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> 1) & 0x01));
@@ -264,6 +286,23 @@ void sniffTCP(struct tcp *tcpHeader) {
    printf("\t\tWindow Size: %hu\n", ntohs(tcpHeader->windowSize));
   
    /* Checksum */  
+   pseudo.tcpLength = TCP_LENGTH;
+   pseudo.src = tcpHeader->src;
+   pseudo.dest = tcpHeader->dest;
+   pseudo.sequenceNumber = tcpHeader->sequenceNumber;
+   pseudo.ackNumber = tcpHeader->ackNumber;
+   pseudo.offsetAndReserved = tcpHeader->offsetAndReserved;
+   pseudo.flags = tcpHeader->flags;
+   pseudo.windowSize = tcpHeader->windowSize;
+   pseudo.checksum = tcpHeader->checksum;
+   pseudo.urgent = tcpHeader->urgent;
+   pseudo.padding = tcpHeader->padding;
+
+   if (in_cksum((unsigned short *)&pseudo, TCP_LENGTH + TCP_PSEUDO_LENGTH))
+      printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(tcpHeader->checksum));
+   else
+      printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(tcpHeader->checksum));
+
 }   
 
 void sniffUDP(struct udp *udpHeader) {
@@ -272,13 +311,13 @@ void sniffUDP(struct udp *udpHeader) {
    const char *dest = getCommonPorts(ntohs(udpHeader->dest));
 
    if (strlen(src) == 0)    
-      printf("\t\tSource Port: %hu\n", ntohs(udpHeader->src));
+      printf("\t\tSource Port:  %hu\n", ntohs(udpHeader->src));
    else 
-      printf("\t\tSource Port: %s\n", src);
+      printf("\t\tSource Port:  %s\n", src);
    if (strlen(dest) == 0)
-      printf("\t\tDest Port: %hu\n\n", ntohs(udpHeader->dest));
+      printf("\t\tDest Port:  %hu\n", ntohs(udpHeader->dest));
    else 
-      printf("\t\tDest Port: %s\n", dest);
+      printf("\t\tDest Port:  %s\n", dest);
 
 }
 

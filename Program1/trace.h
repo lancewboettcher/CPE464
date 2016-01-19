@@ -67,7 +67,28 @@ struct tcp {
    u_char flags;
    uint16_t windowSize;
    uint16_t checksum; 
-   uint16_t urgent; //Maybe not?
+   uint16_t urgent; 
+   uint32_t padding;
+
+}__attribute__((packed));
+
+struct tcpPseudo {
+
+   struct in_addr ipSrc;
+   struct in_addr ipDest;
+   u_char reserved;
+   u_char protocol;
+   uint16_t tcpLength;
+
+   uint16_t src;
+   uint16_t dest;
+   uint32_t sequenceNumber;
+   uint32_t ackNumber;
+   u_char offsetAndReserved;
+   u_char flags;
+   uint16_t windowSize;
+   uint16_t checksum; 
+   uint16_t urgent; 
    uint32_t padding;
 
 }__attribute__((packed));
