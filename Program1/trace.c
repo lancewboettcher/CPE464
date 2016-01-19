@@ -22,13 +22,13 @@
 #define TCP_PSEUDO_LENGTH 12
 
 #define IP_VERSION_LOC 4
-#define DSCP_LOC 5
+#define DSCP_LOC 2
 
 #define ICMP_CODE 1
 #define TCP_CODE 6
 #define UDP_CODE 17
 
-#define TCP_OFFSET_LOC 2
+#define TCP_OFFSET_LOC 4
 #define ACK_FLAG_LOC 4
 
 #define ICMP_REQUEST 8
@@ -167,10 +167,12 @@ void sniffIP(const u_char *loc) {
 
    /* Set info for TCP Pseudo Header */ 
    struct tcpPseudo pseudo;
+
    pseudo.ipSrc = ipHeader->src;
    pseudo.ipDest = ipHeader->dest;
    pseudo.reserved = 0;
    pseudo.protocol = ipHeader->protocol; 
+   pseudo.tcpLength = htons(ntohs(ipHeader->size) - IP_LENGTH);
 
    sniffProtocol(ipHeader->protocol, loc + IP_LENGTH, pseudo);
 }
@@ -269,7 +271,7 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    printf("\t\tACK Number: %u\n", ntohl(tcpHeader->ackNumber));
    
    printf("\t\tData Offset (bytes): %u\n", 
-         (tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x3F); 
+         ((tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x0F) * 4); 
 
    printf("\t\tSYN Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> 1) & 0x01));
@@ -286,7 +288,6 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    printf("\t\tWindow Size: %hu\n", ntohs(tcpHeader->windowSize));
   
    /* Checksum */  
-   pseudo.tcpLength = TCP_LENGTH;
    pseudo.src = tcpHeader->src;
    pseudo.dest = tcpHeader->dest;
    pseudo.sequenceNumber = tcpHeader->sequenceNumber;
@@ -297,8 +298,14 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    pseudo.checksum = tcpHeader->checksum;
    pseudo.urgent = tcpHeader->urgent;
    pseudo.padding = tcpHeader->padding;
+/*
+   printf("\n\nCHECKSUM\nlength: %d\npsh length: %hu\n\n", 
+      ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH, ntohs(pseudo.tcpLength));
+*/
 
-   if (in_cksum((unsigned short *)&pseudo, TCP_LENGTH + TCP_PSEUDO_LENGTH))
+ //  memcpy((char *)&pseudo + TCP_PSEUDO_LENGTH, tcpHeader, TCP_LENGTH);
+
+   if (in_cksum((unsigned short *)&pseudo, ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
       printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(tcpHeader->checksum));
    else
       printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(tcpHeader->checksum));

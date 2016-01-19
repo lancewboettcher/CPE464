@@ -9,12 +9,8 @@
 
 struct ethernet {
 
- //  const struct ether_addr dest;
- //  const struct ether_addr src;
-   
    u_char dest[6];
    u_char src[6];
- 
    uint16_t type;
 
 }__attribute__((packed));

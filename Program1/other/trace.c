@@ -199,7 +199,13 @@ void analyze_tcp(const u_char *packet, int ihl)
 
                                                                        /* Copy TCP header and data into datagram, then calculate checksum */
                                                                        memcpy(&datagram[sizeof(struct tcp_pshdr)], hdr, tcp_segment_len);
-                                                                           checksum = in_cksum((unsigned short *)datagram, sizeof(struct tcp_pshdr) + 
+                                                                           
+                                                                       
+                                                                       printf("\n\nCHECKSUM\n");
+                                                 printf("length: %d\n", sizeof(struct tcp_pshdr) + tcp_segment_len);
+                                                 printf("psh Length %hu\n\n", tcp_segment_len);                      
+                                                                       
+                                                                       checksum = in_cksum((unsigned short *)datagram, sizeof(struct tcp_pshdr) + 
                                                                                              tcp_segment_len);
 
                                                                                /* Calculate flag values from flags field */
