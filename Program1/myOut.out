@@ -1,0 +1,522 @@
+Packet number: 1 Packet Len: 62
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120759613
+		ACK Number: 0
+		Data Offset (bytes): 28
+		SYN Flag: Yes
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: No
+		Window Size: 16384
+Packet number: 2 Packet Len: 62
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359198
+		ACK Number: 120759614
+		Data Offset (bytes): 28
+		SYN Flag: Yes
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 3 Packet Len: 54
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120759614
+		ACK Number: 3289359199
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16560
+Packet number: 4 Packet Len: 74
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359199
+		ACK Number: 120759614
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 5 Packet Len: 54
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120759614
+		ACK Number: 3289359219
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16540
+Packet number: 6 Packet Len: 78
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120759614
+		ACK Number: 3289359219
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16540
+Packet number: 7 Packet Len: 60
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359219
+		ACK Number: 120759638
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 8 Packet Len: 686
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120759638
+		ACK Number: 3289359219
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16540
+Packet number: 9 Packet Len: 60
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359219
+		ACK Number: 120760270
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 10 Packet Len: 438
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359219
+		ACK Number: 120760270
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 11 Packet Len: 78
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120760270
+		ACK Number: 3289359603
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16156
+Packet number: 12 Packet Len: 478
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289359603
+		ACK Number: 120760294
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 13 Packet Len: 54
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120760294
+		ACK Number: 3289360027
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 15732
+Packet number: 14 Packet Len: 470
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120760294
+		ACK Number: 3289360027
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 15732
+Packet number: 15 Packet Len: 60
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289360027
+		ACK Number: 120760710
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 16 Packet Len: 790
+
+	Ethernet Header
+		Dest MAC: 0:2:2d:90:75:89
+		Source MAC: 0:6:25:78:c4:7d
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 51
+		Protocol: TCP
+		Sender IP: 129.65.242.4
+		Dest IP: 192.168.1.102
+
+	TCP Header
+		Source Port: 22
+		Dest Port: 1675
+		Sequence Number: 3289360027
+		ACK Number: 120760710
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 49680
+Packet number: 17 Packet Len: 54
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120760710
+		ACK Number: 3289360763
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16560
+Packet number: 18 Packet Len: 70
+
+	Ethernet Header
+		Dest MAC: 0:6:25:78:c4:7d
+		Source MAC: 0:2:2d:90:75:89
+		Type: IP
+
+	IP Header
+		IP Version: 4
+		Header Len (bytes): 20
+		TOS subfields:
+			Diffserv bits: 0
+			ECN bits: 0
+		TTL: 128
+		Protocol: TCP
+		Sender IP: 192.168.1.102
+		Dest IP: 129.65.242.4
+
+	TCP Header
+		Source Port: 1675
+		Dest Port: 22
+		Sequence Number: 120760710
+		ACK Number: 3289360763
+		Data Offset (bytes): 20
+		SYN Flag: No
+		RST Flag: No
+		FIN Flag: No
+		ACK Flag: Yes
+		Window Size: 16560

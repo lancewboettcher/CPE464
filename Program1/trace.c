@@ -23,7 +23,7 @@
 #define ICMP_CODE 1
 #define TCP_CODE 6
 #define UDP_CODE 17
-#define TCP_OFFSET_LOC 4
+#define TCP_OFFSET_LOC 2
 #define ACK_FLAG_LOC 4
 
 #define ICMP_REQUEST 8
@@ -81,15 +81,6 @@ void sniffTraceFile(char *filename) {
    }
 
    while (nextOut = pcap_next_ex(handle, &header, &packet) == 1) {
-
-   /*      int i = 0;
-         for (i = 0; i < 1000; i++) {
-            if (*(unsigned short *)(packet +ETHERNET_LENGTH + i) == 1663) {
-               printf("**FOUND 1663 at %d\n", i);
-            } 
-         }
-
-*/
 
       printf("Packet number: %d Packet Len: %d\n\n", 
             packetNumber++, header->len);
@@ -256,43 +247,41 @@ void sniffICMP(struct icmp *icmpHeader) {
 
 void sniffTCP(struct tcp *tcpHeader) {
 
-  // printf("\t\tSource Port: %s\n", ntohs(tcpHeader->src));
-  // printf("\t\tDest Port: %s\n", ntohs(tcpHeader->dest)); 
-   printf("\t\tSequence Number: %u\n", tcpHeader->sequenceNumber);
-   printf("\t\tACK Number: %u\n", tcpHeader->ackNumber);
+   printf("\t\tSource Port: %hu\n", ntohs(tcpHeader->src));
+   printf("\t\tDest Port: %hu\n", ntohs(tcpHeader->dest)); 
+   printf("\t\tSequence Number: %u\n", ntohl(tcpHeader->sequenceNumber));
+   printf("\t\tACK Number: %u\n", ntohl(tcpHeader->ackNumber));
    printf("\t\tData Offset (bytes): %u\n", 
-         tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC); 
+         (tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x1F); 
 
-   printf("\t\tSYN FLAG: %s\n", 
+   printf("\t\tSYN Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> 1) & 0x01));
 
-   printf("\t\tRST FLAG: %s\n", 
+   printf("\t\tRST Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> 2) & 0x01));
 
-   printf("\t\tFIN FLAG: %s\n", 
+   printf("\t\tFIN Flag: %s\n", 
          yesOrNo(tcpHeader->flags & 0x01));
 
-   printf("\t\tACK FLAG: %s\n", 
+   printf("\t\tACK Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> ACK_FLAG_LOC) & 0x01));
 
-   printf("\t\tWindow Size: %u\n", tcpHeader->windowSize);
+   printf("\t\tWindow Size: %hu\n", ntohs(tcpHeader->windowSize));
   
    /* Checksum */  
 }   
 
 void sniffUDP(struct udp *udpHeader) {
-printf("HEHE\n");
-   printf("UDP SRC: %s\n", ntohs(udpHeader->src));
 
-   const char *src = getCommonPorts(udpHeader->src);
-   const char *dest = getCommonPorts(udpHeader->dest);
+   const char *src = getCommonPorts(ntohs(udpHeader->src));
+   const char *dest = getCommonPorts(ntohs(udpHeader->dest));
 
    if (strlen(src) == 0)    
-      printf("\t\tSource Port: %s\n", ntohs(udpHeader->src));
+      printf("\t\tSource Port: %hu\n", ntohs(udpHeader->src));
    else 
       printf("\t\tSource Port: %s\n", src);
    if (strlen(dest) == 0)
-      printf("\t\tDest Port: %s\n\n", ntohs(udpHeader->src));
+      printf("\t\tDest Port: %hu\n\n", ntohs(udpHeader->dest));
    else 
       printf("\t\tDest Port: %s\n\n", dest);
 
