@@ -32,6 +32,13 @@
 #define ARP_REQUEST 256
 #define ARP_REPLY 512
 
+#define DNS 53
+#define HTTP 80
+#define Telnet 23
+#define FTP 21
+#define POP3 110
+#define SMTP 25
+
 void sniffTraceFile(char *filename);
 void sniffIP(const u_char *loc);
 void sniffARP(const u_char *loc);
@@ -40,6 +47,7 @@ void sniffProtocol(u_char type, const u_char *loc);
 void sniffICMP(struct icmp *icmpHeader);
 void sniffTCP(struct tcp *tcpHeader);
 void sniffUDP(struct udp *udpHeader);
+const char *getCommonPorts(uint16_t portNumber);
 const char *yesOrNo(u_char val);
 
 int main(int argc, char *argv[]) {
@@ -208,7 +216,7 @@ void sniffProtocol(u_char type, const u_char *loc) {
       case TCP_CODE: 
          printf("\tTCP Header\n");
 
-         struct tcp *tcpHeader = (struct tcp *) loc;
+         struct tcp *tcpHeader = (struct tcp *) (loc + 0);
    
     /*     int i = 0;
          for (i = 0; i < 1000; i++) {
@@ -248,8 +256,8 @@ void sniffICMP(struct icmp *icmpHeader) {
 
 void sniffTCP(struct tcp *tcpHeader) {
 
-   printf("\t\tSource Port: %s\n", ntohs(tcpHeader->src));
-   printf("\t\tDest Port: %s\n", ntohs(tcpHeader->dest)); 
+  // printf("\t\tSource Port: %s\n", ntohs(tcpHeader->src));
+  // printf("\t\tDest Port: %s\n", ntohs(tcpHeader->dest)); 
    printf("\t\tSequence Number: %u\n", tcpHeader->sequenceNumber);
    printf("\t\tACK Number: %u\n", tcpHeader->ackNumber);
    printf("\t\tData Offset (bytes): %u\n", 
@@ -273,11 +281,54 @@ void sniffTCP(struct tcp *tcpHeader) {
 }   
 
 void sniffUDP(struct udp *udpHeader) {
+printf("HEHE\n");
+   printf("UDP SRC: %s\n", ntohs(udpHeader->src));
 
-   printf("\t\tSource Port: %u\n", udpHeader->src);
-   printf("\t\tDest Port: %u\n", udpHeader->dest); 
+   const char *src = getCommonPorts(udpHeader->src);
+   const char *dest = getCommonPorts(udpHeader->dest);
+
+   if (strlen(src) == 0)    
+      printf("\t\tSource Port: %s\n", ntohs(udpHeader->src));
+   else 
+      printf("\t\tSource Port: %s\n", src);
+   if (strlen(dest) == 0)
+      printf("\t\tDest Port: %s\n\n", ntohs(udpHeader->src));
+   else 
+      printf("\t\tDest Port: %s\n\n", dest);
 
 }
+
+const char *getCommonPorts(uint16_t portNumber) {
+   switch (portNumber) {
+      case DNS:
+         return "DNS";
+            
+         break;
+      case HTTP:
+         return "HTTP";
+
+         break;
+      case Telnet:
+         return "Telnet";
+         
+         break;
+      case FTP: 
+         return "FTP";
+         
+         break;
+      case POP3: 
+         return "POP3";
+         
+         break;
+      case SMTP: 
+         return "SMTP";
+
+         break;
+      default:
+
+         return "";
+   }
+}   
 
 const char *yesOrNo(u_char val) {
    if (val == 0x01)
