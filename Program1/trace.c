@@ -8,55 +8,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pcap/pcap.h>
-#include <arpa/inet.h>
 #include <netinet/ether.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-
 #include "trace.h" 
 #include "checksum.h"
 
-#define ETHERNET_LENGTH 14
-#define IP_LENGTH 20
-#define TCP_LENGTH 20
-#define TCP_PSEUDO_LENGTH 12
-
-#define IP_VERSION_LOC 4
-#define DSCP_LOC 2
-
-#define ICMP_CODE 1
-#define TCP_CODE 6
-#define UDP_CODE 17
-
-#define TCP_OFFSET_LOC 4
-#define ACK_FLAG_LOC 4
-#define TCP_CHECKSUM_SIZE 65535
-
-#define ICMP_REQUEST 8
-#define ICMP_REPLY 0
-#define BAD_IP 11
-#define BAD_IP_TYPE 109
-
-#define ARP_REQUEST 256
-#define ARP_REPLY 512
-
-#define DNS 53
-#define HTTP 80
-#define Telnet 23
-#define FTP 21
-#define POP3 110
-#define SMTP 25
-
-void sniffTraceFile(char *filename);
-void sniffIP(const u_char *loc);
-void sniffARP(const u_char *loc);
-void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo, int ip);
+void sniffEthernet(char *filename);
+void sniffIP(const unsigned char *loc);
+void sniffARP(const unsigned char *loc);
+void sniffProtocol(unsigned char type, const unsigned char *loc, 
+      struct tcpPseudo pseudo, int ip);
 void sniffICMP(struct icmp *icmpHeader, int ip);
 void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo);
 void tcpChecksum(struct tcpPseudo pseudo, struct tcp *tcpHeader);
 void sniffUDP(struct udp *udpHeader);
 const char *getCommonPorts(uint16_t portNumber);
-const char *yesOrNo(u_char val);
+int ipVersionAndLength(struct ip *ipHeader);
+void ipTOS(struct ip *ipHeader);
+const char *yesOrNo(unsigned char val);
 
 int main(int argc, char *argv[]) {
 
@@ -65,21 +34,19 @@ int main(int argc, char *argv[]) {
       exit(-1);
    }  
    else {
-      sniffTraceFile(argv[1]);
+      sniffEthernet(argv[1]);
    }
 
    return 0;
 }
 
-void sniffTraceFile(char *filename) {
+void sniffEthernet(char *filename) {
    pcap_t *handle;
    char errorString[PCAP_ERRBUF_SIZE];
    struct pcap_pkthdr *header;
-   const u_char *packet;
+   const unsigned char *packet;
    struct ethernet *ethernetHeader;
    int packetNumber = 1;
-
-   int nextOut;
 
    handle = pcap_open_offline(filename, errorString);
 
@@ -88,12 +55,11 @@ void sniffTraceFile(char *filename) {
       exit(-1);
    }
 
-   while (nextOut = pcap_next_ex(handle, &header, &packet) == 1) {
+   while (pcap_next_ex(handle, &header, &packet) == 1) {
 
       printf("\nPacket number: %d  Packet Len: %d\n\n", 
             packetNumber++, header->len);
 
-      /* Ethernet Packet is always first */ 
       ethernetHeader = (struct ethernet *) packet;
 
       printf("\tEthernet Header\n");
@@ -118,30 +84,15 @@ void sniffTraceFile(char *filename) {
    pcap_close(handle);
 }  
 
-void sniffIP(const u_char *loc) {
+void sniffIP(const unsigned char *loc) {
 
    printf("\tIP Header\n");
 
    struct ip *ipHeader = (struct ip *) loc;
-   int headerLength; 
-   int ipV;
 
-   /* 
-    * Version and Length
-    * 0 | IP Version | 4 | IP Header Length | 7 
-    */ 
-   headerLength = (ipHeader->versionAndLength << 2) & 0x3F;
-   ipV = ipHeader->versionAndLength >> IP_VERSION_LOC;
-   printf("\t\tIP Version: %u\n", ipV);
-   printf("\t\tHeader Len (bytes): %u\n", headerLength);
+   int ipV = ipVersionAndLength(ipHeader); 
 
-   /* 
-    * TOS
-    * 0 | DSCP | 5 | ECN | 7 
-    */ 
-   printf("\t\tTOS subfields:\n");
-   printf("\t\t   Diffserv bits: %u\n", (ipHeader->tos >> DSCP_LOC) & 0x3F);
-   printf("\t\t   ECN bits: %u\n", ipHeader->tos & 0x03);
+   ipTOS(ipHeader);
    
    /* TTL */ 
    printf("\t\tTTL: %u\n", ipHeader->ttl);
@@ -168,7 +119,7 @@ void sniffIP(const u_char *loc) {
    /* Dest IP */ 
    printf("\t\tDest IP: %s\n", inet_ntoa(ipHeader->dest));
 
-   /* Set info for TCP Pseudo Header */ 
+   /* Set IP info for TCP Pseudo Header */ 
    struct tcpPseudo pseudo;
 
    pseudo.ipSrc = ipHeader->src;
@@ -180,7 +131,7 @@ void sniffIP(const u_char *loc) {
    sniffProtocol(ipHeader->protocol, loc + IP_LENGTH, pseudo, ipV);
 }
 
-void sniffARP(const u_char *loc) {
+void sniffARP(const unsigned char *loc) {
 
    printf("\tARP header\n");
 
@@ -209,7 +160,8 @@ void sniffARP(const u_char *loc) {
    printf("\t\tTarget IP: %s\n\n", inet_ntoa(arpHeader->targetIP));
 }
 
-void sniffProtocol(u_char type, const u_char *loc, struct tcpPseudo pseudo, int ip) {
+void sniffProtocol(unsigned char type, const unsigned char *loc,
+      struct tcpPseudo pseudo, int ip) {
 
    switch (type) {
       case ICMP_CODE: 
@@ -272,7 +224,8 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    printf("\t\tACK Number: %u\n", ntohl(tcpHeader->ackNumber));
    
    printf("\t\tData Offset (bytes): %u\n", 
-         ((tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x0F) * 4); 
+         ((tcpHeader->offsetAndReserved >> TCP_OFFSET_LOC) & 0x0F)
+         * sizeof(int)); 
 
    printf("\t\tSYN Flag: %s\n", 
          yesOrNo((tcpHeader->flags >> 1) & 0x01));
@@ -291,25 +244,6 @@ void sniffTCP(struct tcp *tcpHeader, struct tcpPseudo pseudo) {
    tcpChecksum(pseudo, tcpHeader);
 }  
 
-void tcpChecksum(struct tcpPseudo pseudo, struct tcp *tcpHeader) {
-
-   /* Allocate a block for our checksum data to be send to in_cksum */   
-   u_char *checksum = calloc(TCP_CHECKSUM_SIZE, 1);
-
-   /* Copy the pseudo header to our checksum data */ 
-   memcpy(checksum, &pseudo, TCP_PSEUDO_LENGTH);
-
-   /* Copy the TCP Header AND DATA to our checksum data */ 
-   memcpy(checksum + TCP_PSEUDO_LENGTH, tcpHeader, ntohs(pseudo.tcpLength));
-
-   if (in_cksum((unsigned short *)checksum, 
-            ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
-      printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(tcpHeader->checksum));
-   else
-      printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(tcpHeader->checksum));
-
-}
-
 void sniffUDP(struct udp *udpHeader) {
 
    const char *src = getCommonPorts(ntohs(udpHeader->src));
@@ -326,6 +260,55 @@ void sniffUDP(struct udp *udpHeader) {
 
 }
 
+/* Prints the IP Version and Header Length. 
+ * Returns IP Version */ 
+int ipVersionAndLength(struct ip *ipHeader) {
+   /* 
+    * Version and Length
+    * 0 | IP Version | 4 | IP Header Length | 7 
+    */ 
+   int headerLength = (ipHeader->versionAndLength << 2) & 0x3F;
+   int ipV = ipHeader->versionAndLength >> IP_VERSION_LOC;
+   printf("\t\tIP Version: %u\n", ipV);
+   printf("\t\tHeader Len (bytes): %u\n", headerLength);
+   
+   return ipV;
+}
+
+/* Prints the TOS subfields of the IP Packet */ 
+void ipTOS(struct ip *ipHeader) {
+
+   /* 
+    * TOS
+    * 0 | DSCP | 5 | ECN | 7 
+    */ 
+   printf("\t\tTOS subfields:\n");
+   printf("\t\t   Diffserv bits: %u\n", (ipHeader->tos >> DSCP_LOC) & 0x3F);
+   printf("\t\t   ECN bits: %u\n", ipHeader->tos & 0x03);
+
+}
+
+/* Prints the correct checksum output for TCP Packet */ 
+void tcpChecksum(struct tcpPseudo pseudo, struct tcp *tcpHeader) {
+
+   /* Allocate a block for our checksum data to be send to in_cksum */   
+   char *checksum = calloc(TCP_CHECKSUM_SIZE, sizeof(int));
+
+   /* Copy the pseudo header to our checksum data */ 
+   memcpy(checksum, &pseudo, TCP_PSEUDO_LENGTH);
+
+   /* Copy the TCP Header AND DATA to our checksum data */ 
+   memcpy(checksum + TCP_PSEUDO_LENGTH, tcpHeader, ntohs(pseudo.tcpLength));
+
+   if (in_cksum((unsigned short *)checksum, 
+            ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
+      printf("\t\tChecksum: Correct (0x%04hx)\n", ntohs(tcpHeader->checksum));
+   else
+      printf("\t\tChecksum: Incorrect (0x%04hx)\n", ntohs(tcpHeader->checksum));
+
+}
+
+/* Returns a string of a common port number or empty string */ 
 const char *getCommonPorts(uint16_t portNumber) {
    switch (portNumber) {
       case DNS:
@@ -353,12 +336,13 @@ const char *getCommonPorts(uint16_t portNumber) {
 
          break;
       default:
-
+         /* Return empty string for non common ports */ 
          return "";
    }
 }   
 
-const char *yesOrNo(u_char val) {
+/* Returns yes or no strings given unsigned char 0, 1 */ 
+const char *yesOrNo(unsigned char val) {
    if (val == 0x01)
       return "Yes";
    else 
