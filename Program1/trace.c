@@ -298,7 +298,8 @@ void tcpChecksum(struct tcpPseudo pseudo, struct tcp *tcpHeader) {
    memcpy(checksum, &pseudo, TCP_PSEUDO_LENGTH);
 
    /* Copy the TCP Header AND DATA to our checksum data */ 
-   memcpy(checksum + TCP_PSEUDO_LENGTH, tcpHeader, ntohs(pseudo.tcpLength));
+   memcpy(checksum + TCP_PSEUDO_LENGTH, tcpHeader, 
+         ntohs(pseudo.tcpLength) + sizeof(struct tcp));
 
    if (in_cksum((unsigned short *)checksum, 
             ntohs(pseudo.tcpLength) + TCP_PSEUDO_LENGTH) == 0)
