@@ -91,7 +91,7 @@ void initClient(char *argv[]) {
 
    /* Prepare init packet header */ 
    initPacket.header.sequence = tcpClient.sequence = 0;
-   initPacket.header.length = sizeof(struct initCtoS) + initPacket.handleLength;
+   initPacket.header.length = htons(sizeof(struct initCtoS) + initPacket.handleLength);
    initPacket.header.flag = 1;
 
    /* Create the packet */ 
