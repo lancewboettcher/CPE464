@@ -159,21 +159,26 @@ void handleActiveClient(int activeClient) {
       printf("Flag: %u\n", header->flag);
 
       switch(header->flag) {
-         case 1: 
+         case 1:
+            /* Client init packet */    
             handleClientInit(activeClient, buffer);
             break;
          case 4: 
+            /* Broadcast packet */ 
 
             break;
          case 5: 
+            /* Message packet */ 
 
             break;
-
          case 8:
+            /* Client exit packet */ 
 
             break;
 
          case 10: 
+            /* Client list handle packet */ 
+
 
             break;
          default: 

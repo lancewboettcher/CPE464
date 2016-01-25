@@ -123,10 +123,11 @@ void initClient(char *argv[]) {
    
    if (initReply->flag == 3) {
       /* Handle in use */ 
+      printf("Handle in use\n");
       
    }
    else if (initReply->flag == 2) {
-
+      printf("Valid Handle\n");
    }
    else {
       printf("Init reply returned unknown flag: %u\n", initReply->flag);
@@ -134,15 +135,76 @@ void initClient(char *argv[]) {
 }   
 
 void runClient() {
-   printf("$:");
-   while (1) {
+   int inputLength;
+   char buffer[MAX_MESSAGE];
 
-   }   
+   while (1) {
+      printf("$:");
+
+      inputLength = 0;
+      while ((buffer[inputLength] = getchar()) != '\n' && inputLength < MAX_MESSAGE)
+         inputLength++;
+
+      buffer[inputLength] = '\0';
+
+      printf("Client input: %s\n", buffer);
+
+      if (buffer[0] != '%') {
+         printf("Invalid Command\n");
+      }
+
+      switch (buffer[1]) {
+         case 'M': /* Message */ 
+         case 'm': 
+            sendMessage(buffer);
+
+            break;
+         case 'B': /* Broadcast */ 
+         case 'b': 
+            sendBroadcast(buffer);
+
+            break;
+         case 'L': /* List handles */
+         case 'l':
+            listHandles();
+
+            break;
+         case 'E': /* Exit */
+         case 'e':
+            exitClient();
+
+            break;
+         default: 
+            printf("Invalid Command\n");
+      }
+   }
+}
+
+void sendMessage(char *buffer) {
+   
+   printf("Sending Message\n");
 
 }
 
-int tcp_send_setup(char *host_name, char *port)
-{
+void sendBroadcast(char *buffer) {
+
+   printf("Sending Broadcast\n");
+
+}
+
+void listHandles() {
+
+   printf("Listing Handles\n");
+
+}
+
+void exitClient() {
+
+   printf("Client Exiting\n");
+
+}
+
+int tcp_send_setup(char *host_name, char *port) {
    int socket_num;
    struct sockaddr_in remote;       // socket address for remote side
    struct hostent *hp;              // address of remote host
