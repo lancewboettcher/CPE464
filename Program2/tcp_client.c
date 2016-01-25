@@ -33,6 +33,9 @@ int main(int argc, char * argv[])
    }
 
    initClient(argv);
+
+   runClient();
+
 /*
    int socket_num;         //socket descriptor
    char *send_buf;         //data buffer
@@ -115,7 +118,28 @@ void initClient(char *argv[]) {
    }
    
    printf("Init reply length: %d\n", responseLength);
+   struct header *initReply = (struct header *) buffer;
+   printf("flag: %u\n", initReply->flag);
+   
+   if (initReply->flag == 3) {
+      /* Handle in use */ 
+      
+   }
+   else if (initReply->flag == 2) {
+
+   }
+   else {
+      printf("Init reply returned unknown flag: %u\n", initReply->flag);
+   }
 }   
+
+void runClient() {
+   printf("$:");
+   while (1) {
+
+   }   
+
+}
 
 int tcp_send_setup(char *host_name, char *port)
 {

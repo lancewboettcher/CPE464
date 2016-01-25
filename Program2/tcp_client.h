@@ -5,6 +5,7 @@
 
 int validateParams(int argc, char *argv[]);
 void initClient(char *argv[]);
+void runClient();
 int tcp_send_setup(char *host_name, char *port);
 
 struct tcpClient {

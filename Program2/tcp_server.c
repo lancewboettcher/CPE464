@@ -144,45 +144,48 @@ void handleActiveClient(int activeClient) {
       exit(-1);
    }
 
+   printf("Message recieved\n");
+
    /* Client disconnected */ 
    if (messageLength == 0) 
       removeClient(activeClient);
 
-   /* Read message */  
-   printf("Message received, length: %d\n", messageLength);
-   printf("Data: %s\n", buffer);
+   else {
+      /* Read message */  
+      printf("Message received, length: %d\n", messageLength);
+      printf("Data: %s\n", buffer);
 
-   struct header *header = (struct header *)buffer;
-   printf("Flag: %u\n", header->flag);
+      struct header *header = (struct header *)buffer;
+      printf("Flag: %u\n", header->flag);
 
-   switch(header->flag) {
-      case 1: 
-         handleClientInit(activeClient, buffer);
+      switch(header->flag) {
+         case 1: 
+            handleClientInit(activeClient, buffer);
+            break;
+         case 4: 
 
-         break;
-      case 4: 
+            break;
+         case 5: 
 
-         break;
-      case 5: 
+            break;
 
-         break;
+         case 8:
 
-      case 8:
+            break;
 
-         break;
+         case 10: 
 
-      case 10: 
-
-         break;
-      default: 
-         printf("Unknown flag recieved: %u\n", header->flag);
+            break;
+         default: 
+            printf("Unknown flag recieved: %u\n", header->flag);
+      }
    }
-
 }
 
 void handleClientInit(int socket, char *packet) {
    struct initCtoS *initPacket = (struct initCtoS *) packet;
    char handle[MAX_HANDLE_LENGTH + 1];
+   int sent;
 
    memcpy(handle, &initPacket->handleLength + 1, 
          initPacket->handleLength);
@@ -194,11 +197,20 @@ void handleClientInit(int socket, char *packet) {
       
    }
    else {
+      /* Valid handle, update list and send approval to client */ 
       setHandle(socket, handle);
+      
+      struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
+      ackPacket->sequence = 1;
+      ackPacket->length = htons(sizeof(struct header));
+      ackPacket->flag = 2;
 
+      sent = send(socket, ackPacket, ntohs(ackPacket->length), 0);
 
+      if (sent < 0) {
+         printf("Error sending ack init \n");
+      }
    }
-
 }   
 
 int existingHandle(char *handle) {
@@ -251,13 +263,23 @@ void addClient(int socket) {
 }
 
 void removeClient(int socket) {
-   struct client *iterator;
-   while (iterator->next->socket != socket)
-      iterator = iterator->next;
+   printf("Removing client: %d\n", socket);
 
-   iterator->next = iterator->next->next;
+   struct client *iterator = tcpServer.clientList;
 
+   if (iterator->next == NULL) {
+      if (iterator->socket == socket)
+         tcpServer.clientList = NULL;
+   }
+   else {
+      while (iterator->next->socket != socket)
+         iterator = iterator->next;
+
+      iterator->next = iterator->next->next;
+   }
+   
    close(socket);
+   tcpServer.numClients--;
 }
 
 /* This function sets the server socket.  It lets the system
