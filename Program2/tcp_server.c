@@ -20,6 +20,7 @@
 
 #include "networks.h"
 #include "tcp_server.h"
+#include "packets.h"
 
 struct tcpServer tcpServer;
 
@@ -41,7 +42,7 @@ int main(int argc, char *argv[]) {
     buf=  (char *) malloc(buffer_size);
 
     //create the server socket
-    server_socket= tcp_recv_setup();
+    server_socket= tcp_recv_setup(0);
 
 
 
@@ -65,21 +66,111 @@ int main(int argc, char *argv[]) {
 }
 
 void initServer(int argc, char *argv[]) {
+   int i;
 
    /* Create server Socket */
    if (argc > 1) 
       tcpServer.serverSocket = tcp_recv_setup(atoi(argv[1]));
    else 
       tcpServer.serverSocket = tcp_recv_setup(0);
+
+   /* Set all the clients to zero (inactive) */ 
+   for (i = 0; i < MAX_CLIENTS; i++) {
+      tcpServer.clients[i] = 0;
+   }
+
+   tcpServer.clients[0] = tcp_listen(tcpServer.serverSocket, 5);
+
+   tcpServer.numClients = 1;
 }
 
 void runServer() {
+
+   int i, max, newClient;
    
    while (1) {
+      /* Clear fds */ 
+      FD_ZERO(&tcpServer.openFds);
 
+      /* Add the server socket */ 
+      FD_SET(tcpServer.serverSocket, &tcpServer.openFds);
+      max = tcpServer.serverSocket;
 
+      /* Add all the client sockets */ 
+      for (i = 0; i < tcpServer.numClients; i++) {
+         FD_SET(tcpServer.clients[i], &tcpServer.openFds);
 
+         if (tcpServer.clients[i] > max)
+            max = tcpServer.clients[i];
+      }   
+      
+      /* Wait for something to happen */ 
+      if (select(max + 1 , &tcpServer.openFds , NULL , NULL , NULL) < 0) {
+         perror("Error with select\n");
+         exit(-1);
+      }
+
+      /* If activity on server socket -> new connection */ 
+      if (FD_ISSET(tcpServer.serverSocket, &tcpServer.openFds)) {
+
+         /* Accept the new client */ 
+         if ((newClient = accept(tcpServer.serverSocket,
+                     (struct sockaddr*) 0, (socklen_t *) 0)) < 0) {
+            perror("Error accepting new client \n");
+            exit(-1);
+         }
+
+         /* Add the new client to our list */
+         tcpServer.clients[tcpServer.numClients++] = newClient;
+
+         printf("Added new client: %d \n", newClient);
+      }
+
+      /* If other client active -> handle it */ 
+      for (i = 0; i < tcpServer.numClients; i++) {
+         if (FD_ISSET(tcpServer.clients[i], &tcpServer.openFds)) {
+            handleActiveClient(tcpServer.clients[i]);
+         }
+      }
    }
+}
+
+void handleActiveClient(int activeClient) {
+   int messageLength;
+   char buffer[BUFFER_SIZE];
+
+   printf("Handling Client: %d\n", activeClient);
+
+   if ((messageLength = recv(activeClient, buffer, BUFFER_SIZE, 0)) < 0) {
+      perror("Error reading active client \n");
+      exit(-1);
+   }
+
+   /* Client disconnected */ 
+   if (messageLength == 0) 
+      removeClient(activeClient);
+
+   /* Read message */  
+   printf("Message received, length: %d\n", messageLength);
+   printf("Data: %s\n", buffer);
+
+   struct header *header = (struct header *)buffer;
+   printf("Flag: %u\n", header->flag);
+}
+
+void removeClient(int client) {
+   int i;
+
+   for (i = 0; i < tcpServer.numClients; i++) {
+      if (tcpServer.clients[i] == client)
+         break;
+   }
+
+   while (i < tcpServer.numClients - 1) {
+      tcpServer.clients[i] = tcpServer.clients[i + 1];
+   }
+
+   close(client);
 }
 
 /* This function sets the server socket.  It lets the system

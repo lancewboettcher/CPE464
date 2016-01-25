@@ -102,7 +102,7 @@ void initClient(char *argv[]) {
    memcpy(packet + sizeof(struct initCtoS), argv[1], initPacket.handleLength);
 
    /* now send the data */
-   sent = send(tcpClient.socketNum, packet, initPacket.header.length, 0);
+   sent = send(tcpClient.socketNum, packet, ntohs(initPacket.header.length), 0);
    if (sent < 0) {
       perror("send call");
       exit(-1);
