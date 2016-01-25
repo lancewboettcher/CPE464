@@ -130,7 +130,6 @@ int tcp_send_setup(char *host_name, char *port)
       exit(-1);
    }
 
-
    // designate the addressing family
    remote.sin_family= AF_INET;
 

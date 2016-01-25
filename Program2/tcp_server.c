@@ -66,27 +66,19 @@ int main(int argc, char *argv[]) {
 }
 
 void initServer(int argc, char *argv[]) {
-   int i;
-
    /* Create server Socket */
    if (argc > 1) 
       tcpServer.serverSocket = tcp_recv_setup(atoi(argv[1]));
    else 
       tcpServer.serverSocket = tcp_recv_setup(0);
 
-   /* Set all the clients to zero (inactive) */ 
-   for (i = 0; i < MAX_CLIENTS; i++) {
-      tcpServer.clients[i] = 0;
-   }
-
-   tcpServer.clients[0] = tcp_listen(tcpServer.serverSocket, 5);
-
-   tcpServer.numClients = 1;
+   addClient(tcp_listen(tcpServer.serverSocket, 5));
 }
 
 void runServer() {
 
-   int i, max, newClient;
+   int max, newClient;
+   struct client *clientIterator;
    
    while (1) {
       /* Clear fds */ 
@@ -97,11 +89,14 @@ void runServer() {
       max = tcpServer.serverSocket;
 
       /* Add all the client sockets */ 
-      for (i = 0; i < tcpServer.numClients; i++) {
-         FD_SET(tcpServer.clients[i], &tcpServer.openFds);
+      clientIterator = tcpServer.clientList;
+      while (clientIterator != NULL) {
+         FD_SET(clientIterator->socket, &tcpServer.openFds);
 
-         if (tcpServer.clients[i] > max)
-            max = tcpServer.clients[i];
+         if (clientIterator->socket > max)
+            max = clientIterator->socket;
+
+         clientIterator = clientIterator->next;
       }   
       
       /* Wait for something to happen */ 
@@ -121,16 +116,19 @@ void runServer() {
          }
 
          /* Add the new client to our list */
-         tcpServer.clients[tcpServer.numClients++] = newClient;
+         addClient(newClient);
 
          printf("Added new client: %d \n", newClient);
       }
 
       /* If other client active -> handle it */ 
-      for (i = 0; i < tcpServer.numClients; i++) {
-         if (FD_ISSET(tcpServer.clients[i], &tcpServer.openFds)) {
-            handleActiveClient(tcpServer.clients[i]);
+      clientIterator = tcpServer.clientList;
+      while (clientIterator != NULL) {
+         if (FD_ISSET(clientIterator->socket, &tcpServer.openFds)) {
+            handleActiveClient(clientIterator->socket);
          }
+
+         clientIterator = clientIterator->next;
       }
    }
 }
@@ -156,21 +154,110 @@ void handleActiveClient(int activeClient) {
 
    struct header *header = (struct header *)buffer;
    printf("Flag: %u\n", header->flag);
+
+   switch(header->flag) {
+      case 1: 
+         handleClientInit(activeClient, buffer);
+
+         break;
+      case 4: 
+
+         break;
+      case 5: 
+
+         break;
+
+      case 8:
+
+         break;
+
+      case 10: 
+
+         break;
+      default: 
+         printf("Unknown flag recieved: %u\n", header->flag);
+   }
+
 }
 
-void removeClient(int client) {
-   int i;
+void handleClientInit(int socket, char *packet) {
+   struct initCtoS *initPacket = (struct initCtoS *) packet;
+   char handle[MAX_HANDLE_LENGTH + 1];
 
-   for (i = 0; i < tcpServer.numClients; i++) {
-      if (tcpServer.clients[i] == client)
+   memcpy(handle, &initPacket->handleLength + 1, 
+         initPacket->handleLength);
+   handle[initPacket->handleLength] = '\0';
+
+   printf("Handling init from socket: %d, handle: %s\n", socket, handle);
+
+   if (existingHandle(handle)) {
+      
+   }
+   else {
+      setHandle(socket, handle);
+
+
+   }
+
+}   
+
+int existingHandle(char *handle) {
+   struct client *clientIterator;
+
+   clientIterator = tcpServer.clientList;
+   while (clientIterator != NULL) {
+      if (strcmp(clientIterator->handle, handle) == 0) {
+         return 1;
+      }
+
+      clientIterator = clientIterator->next;
+   }
+   
+   return 0;
+}
+
+
+void setHandle(int socket, char *handle) {
+   struct client *clientIterator;
+
+   clientIterator = tcpServer.clientList;
+   while (clientIterator != NULL) {
+      if (clientIterator->socket == socket) {
+         strcpy(clientIterator->handle, handle);
          break;
+      }
+      clientIterator = clientIterator->next;
+   }
+}
+
+void addClient(int socket) {
+   printf("Adding client with socket: %d\n", socket);
+
+   struct client *newClient = (struct client *) malloc(sizeof(struct client));
+   newClient->socket = socket;
+   newClient->next = NULL;
+
+   if (tcpServer.clientList == NULL)
+      tcpServer.clientList = newClient;
+   else {
+      struct client *iterator = tcpServer.clientList;
+      while (iterator->next != NULL) 
+         iterator = iterator->next;
+
+      iterator->next = newClient;
    }
 
-   while (i < tcpServer.numClients - 1) {
-      tcpServer.clients[i] = tcpServer.clients[i + 1];
-   }
+   tcpServer.numClients++;
+}
 
-   close(client);
+void removeClient(int socket) {
+   struct client *iterator;
+   while (iterator->next->socket != socket)
+      iterator = iterator->next;
+
+   iterator->next = iterator->next->next;
+
+   close(socket);
 }
 
 /* This function sets the server socket.  It lets the system
