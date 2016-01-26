@@ -7,6 +7,8 @@
 int validateParams(int argc, char *argv[]);
 void initClient(char *argv[]);
 void runClient();
+void handleServerActivity();
+void handleKeyboardInput();
 void sendMessage(char *buffer);
 void sendBroadcast(char *buffer);
 void listHandles();
@@ -17,4 +19,5 @@ struct tcpClient {
    char handle[MAX_HANDLE_LENGTH];
    int socketNum;
    int sequence;
+   fd_set openFds;
 };

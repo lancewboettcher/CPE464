@@ -135,24 +135,105 @@ void initClient(char *argv[]) {
 }   
 
 void runClient() {
-   int inputLength;
-   char buffer[MAX_MESSAGE];
-
    while (1) {
       printf("$:");
 
-      inputLength = 0;
-      while ((buffer[inputLength] = getchar()) != '\n' && inputLength < MAX_MESSAGE)
-         inputLength++;
+      FD_ZERO(&tcpClient.openFds);
+      FD_SET(tcpClient.socketNum, &tcpClient.openFds);
 
-      buffer[inputLength] = '\0';
+      /* Set stdin */ 
+      FD_SET(0, &tcpClient.openFds);
 
-      printf("Client input: %s\n", buffer);
-
-      if (buffer[0] != '%') {
-         printf("Invalid Command\n");
+      if (select(FD_SETSIZE, &tcpClient.openFds, NULL, NULL, NULL) < 0) {
+         perror("Error with client select\n");
+         exit(-1);
       }
+      
+      //for (i = 0; i < FD_SETSIZE; i++) {
 
+         if (FD_ISSET(tcpClient.socketNum, &tcpClient.openFds)) {
+            /* Activity from server */ 
+           
+            handleServerActivity(); 
+         }
+         else if (FD_ISSET(0, &tcpClient.openFds)) {
+            /* Activity from keyboard */ 
+
+            handleKeyboardInput();
+         }
+    //  }
+   }
+}
+
+void handleServerActivity() {
+   printf("Handling server activity\n");
+
+   int messageLength;
+   char buffer[BUFFER_SIZE];
+
+   if ((messageLength = recv(tcpClient.socketNum, buffer, BUFFER_SIZE, 0)) < 0) {
+      perror("Error recieving from active server\n");
+      exit(-1);
+   }
+
+   if (messageLength == 0) 
+      printf("Recieved empty message from server \n");
+
+   else {
+      printf("Message recieved from server, length: %d\n", messageLength);
+
+      struct header *header = (struct header *) buffer;
+      printf("Flag: %u\n", header->flag);
+
+      switch (header->flag) {
+         case 6: 
+            /* Ack valid message */ 
+            
+            
+            break;
+         case 7: 
+            /* Ack error message */ 
+
+            break;
+         case 9: 
+            /* Ack client exit */ 
+
+
+            break;
+         case 10: 
+            /* Num handles */ 
+
+
+            break;
+         case 11: 
+            /* Handles */ 
+
+
+            break;
+         default: 
+            printf("Unknown flag from server: %d\n", header->flag);
+      }   
+   }
+}
+
+void handleKeyboardInput() {
+   printf("Handling keyboard input \n"); 
+
+   char buffer[MAX_MESSAGE];
+   int inputLength;
+   
+   inputLength = 0;
+   while ((buffer[inputLength] = getchar()) != '\n' && inputLength < MAX_MESSAGE)
+      inputLength++;
+
+   buffer[inputLength] = '\0';
+
+   printf("Client input: %s\n", buffer);
+
+   if (buffer[0] != '%') {
+      printf("Invalid Command\n");
+   }
+   else {
       switch (buffer[1]) {
          case 'M': /* Message */ 
          case 'm': 
@@ -184,6 +265,53 @@ void sendMessage(char *buffer) {
    
    printf("Sending Message\n");
 
+   /* Skip %M */ 
+   char *handle = buffer + 3;
+   char *message = handle;
+
+   while (*message != ' ')
+      message++;
+   
+   /* Replace space with NULL */  
+   *message = '\0';
+   
+   /* Now message points to the message */ 
+   message++;
+   
+   struct header header;
+   header.sequence = tcpClient.sequence++;
+   header.length = htons(sizeof(struct header) + strlen(handle) + 
+      strlen(message) + strlen(tcpClient.handle) + 2);
+   header.flag = 5;
+
+   char *packetHead = malloc(ntohs(header.length));
+   char *packet = packetHead;
+
+   /* Copy the header */ 
+   memcpy(packet, &header, sizeof(header));
+   packet += sizeof(header);
+
+   /* Copy the dest handle length and dest handle (no nulls) */ 
+   *packet++ = strlen(handle);
+   memcpy(packet, handle, strlen(handle) - 1);
+   packet += strlen(handle) - 1;
+
+   /* Copy the src handle length and handle (no nulls) */ 
+   *packet++ = strlen(tcpClient.handle);
+   memcpy(packet, &tcpClient.handle, strlen(tcpClient.handle) - 1);
+   packet += strlen(tcpClient.handle) - 1;
+
+   /* Copy the message */ 
+   memcpy(packet, message, strlen(message));
+
+   /* now send the data */
+   int sent = send(tcpClient.socketNum, packetHead, ntohs(header.length), 0);
+   if (sent < 0) {
+      perror("Error sending message packet to server\n");
+      exit(-1);
+   }
+
+   printf("Sent message to server with length: %d\n", ntohs(header.length));
 }
 
 void sendBroadcast(char *buffer) {

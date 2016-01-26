@@ -98,7 +98,7 @@ void runServer() {
 
          clientIterator = clientIterator->next;
       }   
-      
+     //TODO DO we need max? or FD_SETSIZE 
       /* Wait for something to happen */ 
       if (select(max + 1 , &tcpServer.openFds , NULL , NULL , NULL) < 0) {
          perror("Error with select\n");
@@ -158,27 +158,30 @@ void handleActiveClient(int activeClient) {
       struct header *header = (struct header *)buffer;
       printf("Flag: %u\n", header->flag);
 
-      switch(header->flag) {
+      switch (header->flag) {
          case 1:
             /* Client init packet */    
             handleClientInit(activeClient, buffer);
             break;
          case 4: 
             /* Broadcast packet */ 
+            handleClientBroadcast(activeClient, buffer);
 
             break;
          case 5: 
             /* Message packet */ 
+            handleClientMessage(activeClient, buffer);
 
             break;
          case 8:
             /* Client exit packet */ 
+            handleClientExit(activeClient, buffer);
 
             break;
 
          case 10: 
             /* Client list handle packet */ 
-
+            handleClientListHandles(activeClient, buffer);
 
             break;
          default: 
@@ -217,6 +220,79 @@ void handleClientInit(int socket, char *packet) {
       }
    }
 }   
+
+void handleClientBroadcast(int socket, char *packet) {
+
+
+}
+
+void handleClientMessage(int socket, char *packet) {
+   printf("Handling client message from %d \n", socket);
+
+   char *packetIter = packet;
+   char *responsePacket;
+   struct header responseHeader;
+   int validDest;
+
+   struct header *header = (struct header *) packet;
+   packetIter += sizeof(struct header);
+
+   /* Get the dest handle and length from the packet */ 
+   uint8_t destHandleLength = *packetIter++;
+   char destHandle[MAX_HANDLE_LENGTH];
+
+   memcpy(destHandle, packetIter, destHandleLength);
+   packetIter += destHandleLength;
+   destHandle[destHandleLength] = '\0';
+   
+   /* Prepare a response packet */ 
+   responseHeader.sequence = header->sequence;
+   responseHeader.length = htons(sizeof(struct header) + destHandleLength + 1);
+   
+   if (!existingHandle(destHandle)) {
+      /* handle does not exist, send flag = 7 back */ 
+      responseHeader.flag = 7;
+      validDest = 0;
+   }
+   else {
+      /* valid handle, send flag = 6 back */     
+      responseHeader.flag = 6;
+      validDest = 1;
+   }
+
+   responsePacket = malloc(sizeof(struct header) + destHandleLength + 1);
+   packetIter = responsePacket;
+
+   /* Copy the dest handle length and handle */ 
+   memcpy(responsePacket, &responseHeader, sizeof(struct header));
+   packetIter += sizeof(struct header);
+   *packetIter++ = destHandleLength;
+   memcpy(responsePacket, &destHandle, destHandleLength);
+
+   /* Send the response packet */ 
+   int sent = send(socket, responsePacket, ntohs(responseHeader.length), 0);
+
+   if (sent < 0) {
+      printf("Error sending message response \n");
+   }
+
+   printf("Sent message response packet to %d with length %d\n", socket, ntohs(responseHeader.length));
+
+   /* TODO Forward the message to dest */ 
+   if (validDest) {
+
+   }
+}
+
+void handleClientExit(int socket, char *packet) {
+
+
+}
+
+void handleClientListHandles(int socket, char *packet) {
+
+
+}
 
 int existingHandle(char *handle) {
    struct client *clientIterator;
