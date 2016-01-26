@@ -288,8 +288,46 @@ void sendMessage(char *userInput) {
 }
 
 void sendBroadcast(char *buffer) {
-
    printf("Sending Broadcast\n");
+
+   /* Skip %B */ 
+   char *message = handle + 2;
+
+   /* Replace space with NULL */  
+   *message++ = '\0';
+
+   printf("Broadcast message: '%s'\n", message);
+
+   struct header header;
+   header.sequence = tcpClient.sequence++;
+   header.length = htons(sizeof(struct header) + strlen(message) + 
+         strlen(tcpClient.handle) + 1);
+   header.flag = 4;
+
+   char *packet = malloc(ntohs(header.length));
+   char *packetIter = packetHead;
+
+   /* Copy the header */ 
+   memcpy(packetIter, &header, sizeof(header));
+   packetIter += sizeof(header);
+
+   /* Copy the src handle length and handle (no nulls) */ 
+   *packetIter++ = strlen(tcpClient.handle);
+   memcpy(packetIter, &tcpClient.handle, strlen(tcpClient.handle));
+   packetIter += strlen(tcpClient.handle);
+
+   /* Copy the message */ 
+   memcpy(packetIter, message, strlen(message) + 1);
+
+   /* now send the data */
+   int sent = send(tcpClient.socketNum, packet, ntohs(header.length), 0);
+   if (sent < 0) {
+      perror("Error sending message packet to server\n");
+      exit(-1);
+   }
+
+   printf("Sent message to server with length: %d\n", ntohs(header.length));
+
 
 }
 

@@ -29,39 +29,6 @@ int main(int argc, char *argv[]) {
 
    runServer();
 
-   /*
-    int server_socket= 0;   //socket descriptor for the server socket
-    int client_socket= 0;   //socket descriptor for the client socket
-    char *buf;              //buffer for receiving from client
-    int buffer_size= 1024;  //packet size variable
-    int message_len= 0;     //length of the received message
-
-    printf("sockaddr: %d sockaddr_in %d\n", sizeof(struct sockaddr), sizeof(struct sockaddr_in));
-    
-    //create packet buffer
-    buf=  (char *) malloc(buffer_size);
-
-    //create the server socket
-    server_socket= tcp_recv_setup(0);
-
-
-
-    //look for a client to serve
-    client_socket= tcp_listen(server_socket, 5);
-
-    //now get the data on the client_socket
-    if ((message_len = recv(client_socket, buf, buffer_size, 0)) < 0)
-      {
-	perror("recv call");
-	exit(-1);
-      }
-
-    printf("Message received, length: %d\n", message_len);
-    printf("Data: %s\n", buf);
-    
-    close(server_socket);
-    close(client_socket);
-*/
     return 0;
 }
 
@@ -224,9 +191,47 @@ void handleClientInit(int socket, char *packet) {
 }   
 
 void handleClientBroadcast(int socket, char *packet) {
+   printf("Handling client broadcast from %d \n", socket);
 
+   char *packetIter = packet;
+   char *responsePacket;
+   struct header responseHeader;
+   int destSocket, srcSocket, sent;
+   struct client *clientIterator;
+   
+   struct header *packetHeader = (struct header *) packet;
+   packetIter += sizeof(struct packetHeader);
 
+   /* Get the src handle and length from the packet */ 
+   uint8_t srcHandleLength = *packetIter++;
+   char srcHandle[MAX_HANDLE_LENGTH];
 
+   memcpy(srcHandle, packetIter, srcHandleLength);
+   packetIter += srcHandleLength;
+   srcHandle[srcHandleLength] = '\0';
+
+   srcSocket = getClientSocket(srcHandle);
+ 
+   /* Forward the packet to all clients */ 
+   clientIterator = tcpServer.clientList;
+   while (clientIterator != NULL) {
+      destSocket = clientIterator->socket;
+
+      /* Don't send message to source */ 
+      if (destSocket == srcSocket)
+        continue; 
+
+      sent = send(destSocket, packet, ntohs(packetHeader->length), 0);
+
+      if (sent < 0) {
+         printf("Error sending broadcast \n");
+      } 
+
+      printf("Forwarded broadcast message to handle: %s, socket: %d length: %d\n", 
+            destHandle, destSocket, ntohs(header->length));
+
+      clientIterator = clientIterator->next;
+   }
 }
 
 void handleClientMessage(int socket, char *packet) {
