@@ -1,6 +1,7 @@
 /******************************************************************************
  * tcp_client.c
- *
+ * CPE 464 
+ * Lance Boettcher 
  *****************************************************************************/
 
 #include <stdio.h>
@@ -24,8 +25,7 @@
 
 struct tcpClient tcpClient;
 
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]) {
    /* check command line arguments  */
    if (validateParams(argc, argv) != 0) {
       printf("usage: %s handle host-name port-number \n", argv[0]);
@@ -36,38 +36,6 @@ int main(int argc, char * argv[])
 
    runClient();
 
-/*
-   int socket_num;         //socket descriptor
-   char *send_buf;         //data buffer
-   int bufsize= 0;         //data buffer size
-   int send_len= 0;        //amount of data to send
-   int sent= 0;            //actual amount of data sent
-
-   // set up the socket for TCP transmission  
-   socket_num= tcp_send_setup(argv[1], argv[2]);
-
-   // initialize data buffer for the packet 
-   bufsize= 1024;
-   send_buf= (char *) malloc(bufsize);
-
-   // get the data and send it   
-   printf("Enter the data to send: ");
-
-   send_len = 0;
-   while ((send_buf[send_len] = getchar()) != '\n' && send_len < 80)
-      send_len++;
-
-   send_buf[send_len] = '\0';
-
-   // now send the packet 
-   sent =  send(socket_num, send_buf, send_len, 0);
-   if (sent < 0) {
-      perror("send call");
-      exit(-1);
-   }
-*/
-
-   
    return 0;
 }
 
@@ -111,7 +79,7 @@ void initClient(char *argv[]) {
       exit(-1);
    }
 
-   /* Block until reply then read it into buffer*/ 
+   /* Block until reply then read it into buffer */
    if ((responseLength = recv(tcpClient.socketNum, buffer, BUFFER_SIZE, 0)) < 0) {
       perror("No response from server after init\n");
       exit(-1);
@@ -122,9 +90,9 @@ void initClient(char *argv[]) {
    printf("flag: %u\n", initReply->flag);
    
    if (initReply->flag == 3) {
-      /* Handle in use */ 
+      /* Handle in use */
       printf("Handle in use\n");
-      
+      exit(-1);
    }
    else if (initReply->flag == 2) {
       printf("Valid Handle\n");
@@ -164,7 +132,7 @@ void runClient() {
 }
 
 void handleServerActivity() {
-   printf("Handling server activity\n");
+   printf("\nHandling server activity\n");
 
    int messageLength;
    char buffer[BUFFER_SIZE];
@@ -221,7 +189,7 @@ void handleServerActivity() {
 }
 
 void handleKeyboardInput() {
-   printf("Handling keyboard input \n"); 
+   printf("\nHandling keyboard input \n"); 
 
    char buffer[MAX_MESSAGE];
    int inputLength;
@@ -279,11 +247,8 @@ void sendMessage(char *userInput) {
       message++;
    
    /* Replace space with NULL */  
-   *message = '\0';
+   *message++ = '\0';
 
-   /* Now message points to the message */ 
-   message++;
-  
    printf("Dest handle: '%s' message: '%s'\n", handle, message);
 
    struct header header;
@@ -380,7 +345,8 @@ void ackErrorMessage(char *packet) {
 
 void ackExit(char *packet) {
    printf("Ack Exit recieved\n");
-   
+  
+   exit(0); 
 }
 
 void numHandlesResponse(char *packet) {

@@ -76,7 +76,6 @@ void initServer(int argc, char *argv[]) {
 }
 
 void runServer() {
-
    int max, newClient;
    struct client *clientIterator;
    
@@ -137,7 +136,7 @@ void handleActiveClient(int activeClient) {
    int messageLength;
    char buffer[BUFFER_SIZE];
 
-   printf("Handling Client: %d\n", activeClient);
+   printf("\nHandling Client: %d\n", activeClient);
 
    if ((messageLength = recv(activeClient, buffer, BUFFER_SIZE, 0)) < 0) {
       perror("Error reading active client \n");
@@ -147,7 +146,7 @@ void handleActiveClient(int activeClient) {
    printf("Message recieved\n");
 
    /* Client disconnected */ 
-   if (messageLength == 0) 
+   if (messageLength == 0) //TODO dont remove on invalid client handle disconnect 
       removeClient(activeClient);
 
    else {
@@ -194,40 +193,44 @@ void handleClientInit(int socket, char *packet) {
    struct initCtoS *initPacket = (struct initCtoS *) packet;
    char handle[MAX_HANDLE_LENGTH + 1];
    int sent;
+   struct header *ackPacket;
 
    memcpy(handle, &initPacket->handleLength + 1, 
          initPacket->handleLength);
    handle[initPacket->handleLength] = '\0';
 
-   printf("Handling init from socket: %d, handle: %s\n", socket, handle);
+   printf("\nHandling init from socket: %d, handle: %s\n", socket, handle);
+
+   ackPacket = (struct header *) malloc(sizeof(struct header));
+   ackPacket->sequence = 1;
+   ackPacket->length = htons(sizeof(struct header));
 
    if (existingHandle(handle)) {
-      
+      /* Invalid Handle, send error packet back */ 
+      ackPacket->flag = 3;
    }
    else {
       /* Valid handle, update list and send approval to client */ 
       setHandle(socket, handle);
-      
-      struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
-      ackPacket->sequence = 1;
-      ackPacket->length = htons(sizeof(struct header));
       ackPacket->flag = 2;
+   }
+   
+   /* Send the response packet */ 
+   sent = send(socket, ackPacket, ntohs(ackPacket->length), 0);
 
-      sent = send(socket, ackPacket, ntohs(ackPacket->length), 0);
-
-      if (sent < 0) {
-         printf("Error sending ack init \n");
-      }
+   if (sent < 0) {
+      printf("Error sending ack init \n");
    }
 }   
 
 void handleClientBroadcast(int socket, char *packet) {
 
 
+
 }
 
 void handleClientMessage(int socket, char *packet) {
-   printf("\nHandling client message from %d \n", socket);
+   printf("Handling client message from %d \n", socket);
 
    char *packetIter = packet;
    char *responsePacket;
@@ -296,11 +299,25 @@ void handleClientMessage(int socket, char *packet) {
 }
 
 void handleClientExit(int socket, char *packet) {
+   printf("Sending exit ack to socket: %d\n", socket);
+   struct header *packetHeader = packet;
 
+   /* Prepare the ack packet */ 
+   struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
+   ackPacket->sequence = packetHeader->sequence;
+   ackPacket->length = htons(sizeof(struct header));
+   ackPacket->flag = 8;
+   
+   /* Send the ack packet */ 
+   sent = send(socket, ackPacket, ntohs(ackPacket->length), 0);
 
+   if (sent < 0) {
+      printf("Error sending ack init \n");
+   }
 }
 
 void handleClientListHandles(int socket, char *packet) {
+
 
 
 }
