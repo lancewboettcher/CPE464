@@ -227,7 +227,7 @@ void handleClientBroadcast(int socket, char *packet) {
 }
 
 void handleClientMessage(int socket, char *packet) {
-   printf("Handling client message from %d \n", socket);
+   printf("\nHandling client message from %d \n", socket);
 
    char *packetIter = packet;
    char *responsePacket;
@@ -250,7 +250,10 @@ void handleClientMessage(int socket, char *packet) {
    responseHeader.length = htons(sizeof(struct header) + destHandleLength + 1);
    
    if (!existingHandle(destHandle)) {
-      /* handle does not exist, send flag = 7 back */ 
+      /* handle does not exist, send flag = 7 back */
+      
+      printf("Handle: '%s' does not exist\n", destHandle);
+
       responseHeader.flag = 7;
       validDest = 0;
    }
@@ -278,9 +281,17 @@ void handleClientMessage(int socket, char *packet) {
 
    printf("Sent message response packet to %d with length %d\n", socket, ntohs(responseHeader.length));
 
-   /* TODO Forward the message to dest */ 
    if (validDest) {
+      /* Forward the message to dest if valid dest handle */
+      int destSocket = getClientSocket(destHandle); 
+      sent = send(destSocket, packet, ntohs(header->length), 0);
 
+      if (sent < 0) {
+         printf("Error sending message response \n");
+      } 
+
+      printf("Forwarded message to handle: %s, socket: %d length: %d\n", 
+            destHandle, destSocket, ntohs(header->length));
    }
 }
 
@@ -321,6 +332,21 @@ void setHandle(int socket, char *handle) {
       }
       clientIterator = clientIterator->next;
    }
+}
+
+int getClientSocket(char *handle) {
+   struct client *clientIterator;
+
+   clientIterator = tcpServer.clientList;
+   while (clientIterator != NULL) {
+      if (strcmp(clientIterator->handle, handle) == 0) {
+         return clientIterator->socket;
+      }
+
+      clientIterator = clientIterator->next;
+   }
+
+   return -1;
 }
 
 void addClient(int socket) {

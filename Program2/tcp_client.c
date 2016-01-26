@@ -137,6 +137,7 @@ void initClient(char *argv[]) {
 void runClient() {
    while (1) {
       printf("$:");
+      fflush(stdout);
 
       FD_ZERO(&tcpClient.openFds);
       FD_SET(tcpClient.socketNum, &tcpClient.openFds);
@@ -149,19 +150,16 @@ void runClient() {
          exit(-1);
       }
       
-      //for (i = 0; i < FD_SETSIZE; i++) {
+      if (FD_ISSET(tcpClient.socketNum, &tcpClient.openFds)) {
+         /* Activity from server */ 
+        
+         handleServerActivity(); 
+      }
+      else if (FD_ISSET(0, &tcpClient.openFds)) {
+         /* Activity from keyboard */ 
 
-         if (FD_ISSET(tcpClient.socketNum, &tcpClient.openFds)) {
-            /* Activity from server */ 
-           
-            handleServerActivity(); 
-         }
-         else if (FD_ISSET(0, &tcpClient.openFds)) {
-            /* Activity from keyboard */ 
-
-            handleKeyboardInput();
-         }
-    //  }
+         handleKeyboardInput();
+      }
    }
 }
 
@@ -186,28 +184,34 @@ void handleServerActivity() {
       printf("Flag: %u\n", header->flag);
 
       switch (header->flag) {
+         case 5: 
+            /* Message */ 
+            handleMessage(buffer);
+
+            break;
          case 6: 
             /* Ack valid message */ 
-            
+            ackValidMessage(buffer);
             
             break;
          case 7: 
             /* Ack error message */ 
+            ackErrorMessage(buffer);
 
             break;
          case 9: 
             /* Ack client exit */ 
-
+            ackExit(buffer);
 
             break;
          case 10: 
             /* Num handles */ 
-
+            numHandlesResponse(buffer);
 
             break;
          case 11: 
             /* Handles */ 
-
+            handlesResponse(buffer);
 
             break;
          default: 
@@ -261,12 +265,14 @@ void handleKeyboardInput() {
    }
 }
 
-void sendMessage(char *buffer) {
+/* Client to server handlers */ 
+
+void sendMessage(char *userInput) {
    
-   printf("Sending Message\n");
+   printf("\nSending Message\n");
 
    /* Skip %M */ 
-   char *handle = buffer + 3;
+   char *handle = userInput + 3;
    char *message = handle;
 
    while (*message != ' ')
@@ -274,10 +280,12 @@ void sendMessage(char *buffer) {
    
    /* Replace space with NULL */  
    *message = '\0';
-   
+
    /* Now message points to the message */ 
    message++;
-   
+  
+   printf("Dest handle: '%s' message: '%s'\n", handle, message);
+
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(handle) + 
@@ -293,16 +301,16 @@ void sendMessage(char *buffer) {
 
    /* Copy the dest handle length and dest handle (no nulls) */ 
    *packet++ = strlen(handle);
-   memcpy(packet, handle, strlen(handle) - 1);
-   packet += strlen(handle) - 1;
+   memcpy(packet, handle, strlen(handle));
+   packet += strlen(handle);
 
    /* Copy the src handle length and handle (no nulls) */ 
    *packet++ = strlen(tcpClient.handle);
-   memcpy(packet, &tcpClient.handle, strlen(tcpClient.handle) - 1);
-   packet += strlen(tcpClient.handle) - 1;
+   memcpy(packet, &tcpClient.handle, strlen(tcpClient.handle));
+   packet += strlen(tcpClient.handle);
 
    /* Copy the message */ 
-   memcpy(packet, message, strlen(message));
+   memcpy(packet, message, strlen(message) + 1);
 
    /* now send the data */
    int sent = send(tcpClient.socketNum, packetHead, ntohs(header.length), 0);
@@ -331,6 +339,61 @@ void exitClient() {
    printf("Client Exiting\n");
 
 }
+
+/* Server to client handlers */
+
+void handleMessage(char *packet) {
+   printf("\nRecieved message from another client\n");
+
+   char *packetIter = packet;
+   uint8_t destHandleLength, srcHandleLength;
+   char srcHandle[MAX_HANDLE_LENGTH];
+   char message[MAX_MESSAGE];
+
+   packetIter += sizeof(struct header);
+   
+   /* Skip past dest handle */ 
+   destHandleLength = *packetIter++;
+   packetIter += destHandleLength;
+
+   /* Get the source handle */ 
+   srcHandleLength = *packetIter++;
+   memcpy(srcHandle, packetIter, srcHandleLength);
+   srcHandle[srcHandleLength] = '\0';
+   packetIter += srcHandleLength;
+
+   /* Get the message */ 
+   strcpy(message, packetIter);
+
+   printf("%s: %s\n", srcHandle, message);
+}
+
+void ackValidMessage(char *packet) {
+   printf("Ack valid message recieved\n");
+
+}
+
+void ackErrorMessage(char *packet) {
+   printf("Ack message error recieved\n");
+
+}
+
+void ackExit(char *packet) {
+   printf("Ack Exit recieved\n");
+   
+}
+
+void numHandlesResponse(char *packet) {
+   printf("Num handles response recieved\n");
+
+}
+
+void handlesResponse(char *packet) {
+   printf("Handles response recieved\n");
+
+}
+
+/* Helpers */ 
 
 int tcp_send_setup(char *host_name, char *port) {
    int socket_num;
