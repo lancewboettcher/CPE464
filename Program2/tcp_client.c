@@ -142,9 +142,10 @@ void handleServerActivity() {
       exit(-1);
    }
 
-   if (messageLength == 0) 
+   if (messageLength == 0) { 
       printf("Recieved empty message from server \n");
-
+      exit(-1);
+   }
    else {
       printf("Message recieved from server, length: %d\n", messageLength);
 
@@ -259,7 +260,7 @@ void sendMessage(char *userInput) {
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(handle) + 
-      strlen(message) + strlen(tcpClient.handle) + 2);
+      strlen(message) + strlen(tcpClient.handle) + 3);
    header.flag = 5;
 
    char *packetHead = malloc(ntohs(header.length));

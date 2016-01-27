@@ -177,7 +177,9 @@ void handleClientInit(int socket, char *packet) {
       ackPacket->flag = 3;
    }
    else {
-      /* Valid handle, update list and send approval to client */ 
+      /* Valid handle, update list and send approval to client */
+      printf("Setting handle of socket %d to '%s'\n", socket, handle);
+
       setHandle(socket, handle);
       ackPacket->flag = 2;
    }
@@ -256,7 +258,7 @@ void handleClientMessage(int socket, char *packet) {
    destHandle[destHandleLength] = '\0';
    
    /* Prepare a response packet */ 
-   responseHeader.sequence = header->sequence;
+   responseHeader.sequence = tcpServer.sequence++;
    responseHeader.length = htons(sizeof(struct header) + destHandleLength + 1);
    
    if (!existingHandle(destHandle)) {
@@ -315,7 +317,7 @@ void handleClientExit(int socket, char *packet) {
    struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
    ackPacket->sequence = packetHeader->sequence;
    ackPacket->length = htons(sizeof(struct header));
-   ackPacket->flag = 8;
+   ackPacket->flag = 9;
    
    /* Send the ack packet */ 
    sent = send(socket, ackPacket, ntohs(ackPacket->length), 0);
@@ -347,7 +349,11 @@ void handleClientListHandles(int socket, char *packet) {
    packetIter += sizeof(struct header);
 
    /* Copy the number of handles */ 
-   *packetIter = tcpServer.numClients;
+   *(uint32_t *)packetIter = tcpServer.numClients;
+   
+   printf("Num handles tcpServer.numClients: %d packetIter: %d\n",
+         tcpServer.numClients, *(uint32_t *) packetIter);
+
 
    /* Send the num handles packet */ 
    sent = send(socket, responsePacket, ntohs(responseHeader.length), 0);
@@ -380,7 +386,6 @@ void handleClientListHandles(int socket, char *packet) {
       memcpy(packetIter, clientIterator->handle, handleLength);
 
       packetIter += handleLength;
-
       clientIterator = clientIterator->next;
    }
 
@@ -444,6 +449,7 @@ void addClient(int socket) {
    struct client *newClient = (struct client *) malloc(sizeof(struct client));
    newClient->socket = socket;
    newClient->next = NULL;
+   *newClient->handle = '\0';
 
    if (tcpServer.clientList == NULL)
       tcpServer.clientList = newClient;
@@ -466,6 +472,13 @@ void removeClient(int socket) {
    if (iterator->next == NULL) {
       if (iterator->socket == socket)
          tcpServer.clientList = NULL;
+   }
+
+   else if (iterator->socket == socket) {
+      /* Remove the first item in the list */
+
+      tcpServer.clientList = iterator->next;
+
    }
    else {
       while (iterator->next->socket != socket)
