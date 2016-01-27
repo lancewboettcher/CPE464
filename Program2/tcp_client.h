@@ -13,6 +13,7 @@ void sendMessage(char *userInput);
 void sendBroadcast(char *buffer);
 void listHandles();
 void exitClient();
+void handleBroadcast(char *packet);
 void handleMessage(char *packet);
 void ackValidMessage(char *packet);
 void ackErrorMessage(char *packet);
@@ -26,4 +27,5 @@ struct tcpClient {
    int socketNum;
    int sequence;
    fd_set openFds;
+   uint32_t numHandles;
 };

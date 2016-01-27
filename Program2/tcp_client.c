@@ -152,6 +152,11 @@ void handleServerActivity() {
       printf("Flag: %u\n", header->flag);
 
       switch (header->flag) {
+         case 4: 
+            /* Broadcast */ 
+            handleBroadcast(buffer);
+
+            break;
          case 5: 
             /* Message */ 
             handleMessage(buffer);
@@ -172,12 +177,12 @@ void handleServerActivity() {
             ackExit(buffer);
 
             break;
-         case 10: 
+         case 11: 
             /* Num handles */ 
             numHandlesResponse(buffer);
 
             break;
-         case 11: 
+         case 12: 
             /* Handles */ 
             handlesResponse(buffer);
 
@@ -291,7 +296,7 @@ void sendBroadcast(char *buffer) {
    printf("Sending Broadcast\n");
 
    /* Skip %B */ 
-   char *message = handle + 2;
+   char *message = buffer + 2;
 
    /* Replace space with NULL */  
    *message++ = '\0';
@@ -305,7 +310,7 @@ void sendBroadcast(char *buffer) {
    header.flag = 4;
 
    char *packet = malloc(ntohs(header.length));
-   char *packetIter = packetHead;
+   char *packetIter = packet;
 
    /* Copy the header */ 
    memcpy(packetIter, &header, sizeof(header));
@@ -327,23 +332,68 @@ void sendBroadcast(char *buffer) {
    }
 
    printf("Sent message to server with length: %d\n", ntohs(header.length));
-
-
 }
 
 void listHandles() {
-
    printf("Listing Handles\n");
 
+   struct header *header = (struct header *) malloc(sizeof(struct header));
+
+   header->sequence = tcpClient.sequence++;
+   header->length = htons(sizeof(struct header));
+   header->flag = 10; 
+
+   int sent = send(tcpClient.socketNum, header, ntohs(header->length), 0);
+   if (sent < 0) {
+      perror("Error sending exit packet to server\n");
+      exit(-1);
+   }
+
+   printf("Sent list handles request to server with length: %d\n", ntohs(header->length));
 }
 
 void exitClient() {
-
    printf("Client Exiting\n");
 
+   struct header *header = (struct header *) malloc(sizeof(struct header));
+
+   header->sequence = tcpClient.sequence++;
+   header->length = htons(sizeof(struct header));
+   header->flag = 8; 
+
+   int sent = send(tcpClient.socketNum, header, ntohs(header->length), 0);
+   if (sent < 0) {
+      perror("Error sending exit packet to server\n");
+      exit(-1);
+   }
+
+   printf("Sent exit to server with length: %d\n", ntohs(header->length));
 }
 
 /* Server to client handlers */
+
+void handleBroadcast(char *packet) {
+   printf("\nRecieved broadcast from another client\n");
+
+   char *packetIter = packet;
+   uint8_t srcHandleLength;
+   char srcHandle[MAX_HANDLE_LENGTH];
+   char message[MAX_MESSAGE];
+
+   /* Skip header */ 
+   packetIter += sizeof(struct header);
+
+   /* Get the source handle */ 
+   srcHandleLength = *packetIter++;
+   memcpy(srcHandle, packetIter, srcHandleLength);
+   srcHandle[srcHandleLength] = '\0';
+   packetIter += srcHandleLength;
+
+   /* Get the message */ 
+   strcpy(message, packetIter);
+   
+   printf("%s: %s\n", srcHandle, message);
+}
 
 void handleMessage(char *packet) {
    printf("\nRecieved message from another client\n");
@@ -353,6 +403,7 @@ void handleMessage(char *packet) {
    char srcHandle[MAX_HANDLE_LENGTH];
    char message[MAX_MESSAGE];
 
+   /* Skip header */ 
    packetIter += sizeof(struct header);
    
    /* Skip past dest handle */ 
@@ -390,11 +441,38 @@ void ackExit(char *packet) {
 void numHandlesResponse(char *packet) {
    printf("Num handles response recieved\n");
 
+   char *packetIter = packet;
+   packetIter += sizeof(struct header);
+
+   tcpClient.numHandles = *((uint32_t *) packetIter);
+
+   printf("Num handles: %d", tcpClient.numHandles);
 }
 
 void handlesResponse(char *packet) {
    printf("Handles response recieved\n");
 
+   int i;
+   char *packetIter = packet;
+   char handleBuffer[MAX_HANDLE_LENGTH];
+   uint8_t handleLength;
+
+   packetIter += sizeof(struct header);
+
+   for (i = 0; i < tcpClient.numHandles; i++) {
+      handleLength = *((uint8_t *) packetIter++);
+
+      /* Copy the handle into buffer */ 
+      memcpy(handleBuffer, packetIter, handleLength);
+
+      handleBuffer[handleLength] = '\0';
+
+      /* Print the handle */ 
+      printf("%s\n", handleBuffer);
+
+      packetIter += handleLength;
+      memset(handleBuffer, '\0', MAX_HANDLE_LENGTH);
+   }
 }
 
 /* Helpers */ 

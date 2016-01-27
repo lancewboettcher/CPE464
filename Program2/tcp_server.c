@@ -194,13 +194,11 @@ void handleClientBroadcast(int socket, char *packet) {
    printf("Handling client broadcast from %d \n", socket);
 
    char *packetIter = packet;
-   char *responsePacket;
-   struct header responseHeader;
    int destSocket, srcSocket, sent;
    struct client *clientIterator;
    
    struct header *packetHeader = (struct header *) packet;
-   packetIter += sizeof(struct packetHeader);
+   packetIter += sizeof(struct header);
 
    /* Get the src handle and length from the packet */ 
    uint8_t srcHandleLength = *packetIter++;
@@ -211,6 +209,8 @@ void handleClientBroadcast(int socket, char *packet) {
    srcHandle[srcHandleLength] = '\0';
 
    srcSocket = getClientSocket(srcHandle);
+
+   printf("Broadcasting message to %d clients\n", tcpServer.numClients);
  
    /* Forward the packet to all clients */ 
    clientIterator = tcpServer.clientList;
@@ -218,8 +218,10 @@ void handleClientBroadcast(int socket, char *packet) {
       destSocket = clientIterator->socket;
 
       /* Don't send message to source */ 
-      if (destSocket == srcSocket)
-        continue; 
+      if (destSocket == srcSocket) {
+         clientIterator = clientIterator->next;
+         continue; 
+      }
 
       sent = send(destSocket, packet, ntohs(packetHeader->length), 0);
 
@@ -227,8 +229,8 @@ void handleClientBroadcast(int socket, char *packet) {
          printf("Error sending broadcast \n");
       } 
 
-      printf("Forwarded broadcast message to handle: %s, socket: %d length: %d\n", 
-            destHandle, destSocket, ntohs(header->length));
+      printf("Forwarded broadcast message to socket: %d length: %d\n", 
+            destSocket, ntohs(packetHeader->length));
 
       clientIterator = clientIterator->next;
    }
@@ -305,7 +307,9 @@ void handleClientMessage(int socket, char *packet) {
 
 void handleClientExit(int socket, char *packet) {
    printf("Sending exit ack to socket: %d\n", socket);
-   struct header *packetHeader = packet;
+   
+   struct header *packetHeader = (struct header *) packet;
+   int sent;
 
    /* Prepare the ack packet */ 
    struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
@@ -322,9 +326,72 @@ void handleClientExit(int socket, char *packet) {
 }
 
 void handleClientListHandles(int socket, char *packet) {
+   printf("Handling list handles for socket %d\n", socket);
 
+   struct header responseHeader;
+   char *responsePacket, *packetIter;
+   int sent, totalHandleLength = 0;
+   uint8_t handleLength;
+   struct client *clientIterator;
 
+   /* Prepare flag = 11 packet */ 
+   responseHeader.sequence = tcpServer.sequence++;
+   responseHeader.length = htons(sizeof(struct header) + sizeof(uint32_t));
+   responseHeader.flag = 11;
 
+   responsePacket = malloc(ntohs(responseHeader.length));
+   packetIter = responsePacket;
+
+   /* Copy the header */ 
+   memcpy(responsePacket, &responseHeader, ntohs(responseHeader.length));
+   packetIter += sizeof(struct header);
+
+   /* Copy the number of handles */ 
+   *packetIter = tcpServer.numClients;
+
+   /* Send the num handles packet */ 
+   sent = send(socket, responsePacket, ntohs(responseHeader.length), 0);
+
+   if (sent < 0) {
+      printf("Error sending list handle number message response \n");
+   } 
+
+   printf("Sent num handles packet. Num handles: %d\n", tcpServer.numClients);
+
+   /* Prepare flag = 12 packet */ 
+   responseHeader.sequence = tcpServer.sequence++;
+   responseHeader.length = 0; //This is supposed to be zero
+   responseHeader.flag = 12;
+
+   responsePacket = malloc(BUFFER_SIZE);//TODO change this
+   packetIter = responsePacket;
+
+   /* Copy the header */ 
+   memcpy(responsePacket, &responseHeader, sizeof(struct header));
+   packetIter += sizeof(struct header);
+
+   /* Copy the handles and lengths */ 
+   clientIterator = tcpServer.clientList;
+   while (clientIterator != NULL) {
+      handleLength = strlen(clientIterator->handle);
+      totalHandleLength += handleLength + 1;
+      
+      *packetIter++ = handleLength;
+      memcpy(packetIter, clientIterator->handle, handleLength);
+
+      packetIter += handleLength;
+
+      clientIterator = clientIterator->next;
+   }
+
+   sent = send(socket, responsePacket, sizeof(struct header) + totalHandleLength, 0);
+
+   if (sent < 0) {
+      printf("Error sending list handle handles response \n");
+   } 
+
+   printf("Sent handles packet. total handle length: %d\n", totalHandleLength);
+   
 }
 
 int existingHandle(char *handle) {
