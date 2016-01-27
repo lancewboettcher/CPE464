@@ -91,7 +91,7 @@ void initClient(char *argv[]) {
    
    if (initReply->flag == 3) {
       /* Handle in use */
-      printf("Handle in use\n");
+      printf("Handle already in use: %s\n", tcpClient.handle);
       exit(-1);
    }
    else if (initReply->flag == 2) {
@@ -143,7 +143,7 @@ void handleServerActivity() {
    }
 
    if (messageLength == 0) { 
-      printf("Recieved empty message from server \n");
+      printf("Server Terminated\n");
       exit(-1);
    }
    else {
@@ -307,7 +307,7 @@ void sendBroadcast(char *buffer) {
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(message) + 
-         strlen(tcpClient.handle) + 1);
+         strlen(tcpClient.handle) + 2);
    header.flag = 4;
 
    char *packet = malloc(ntohs(header.length));
@@ -431,6 +431,17 @@ void ackValidMessage(char *packet) {
 void ackErrorMessage(char *packet) {
    printf("Ack message error recieved\n");
 
+   char *packetIter = packet;
+   uint8_t handleLength;
+   char handle[MAX_HANDLE_LENGTH];
+
+   packetIter += sizeof(struct header);
+   handleLength = *packetIter++;
+
+   memcpy(handle, packetIter, handleLength);
+   handle[handleLength] = '\0';
+
+   printf("Client with handle %s does not exist\n", handle);
 }
 
 void ackExit(char *packet) {

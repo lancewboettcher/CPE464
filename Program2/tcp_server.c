@@ -38,6 +38,8 @@ void initServer(int argc, char *argv[]) {
       tcpServer.serverSocket = tcp_recv_setup(atoi(argv[1]));
    else 
       tcpServer.serverSocket = tcp_recv_setup(0);
+   
+   tcpServer.sequence = 1;
 
    addClient(tcp_listen(tcpServer.serverSocket, 5));
 }
@@ -169,7 +171,7 @@ void handleClientInit(int socket, char *packet) {
    printf("\nHandling init from socket: %d, handle: %s\n", socket, handle);
 
    ackPacket = (struct header *) malloc(sizeof(struct header));
-   ackPacket->sequence = 1;
+   ackPacket->sequence = tcpServer.sequence++;
    ackPacket->length = htons(sizeof(struct header));
 
    if (existingHandle(handle)) {
@@ -239,7 +241,7 @@ void handleClientBroadcast(int socket, char *packet) {
 }
 
 void handleClientMessage(int socket, char *packet) {
-   printf("Handling client message from %d \n", socket);
+   printf("\nHandling client message from %d \n", socket);
 
    char *packetIter = packet;
    char *responsePacket;
@@ -278,11 +280,13 @@ void handleClientMessage(int socket, char *packet) {
    responsePacket = malloc(sizeof(struct header) + destHandleLength + 1);
    packetIter = responsePacket;
 
+   printf("Creating response packet. flag: %d\n", responseHeader.flag);
+
    /* Copy the dest handle length and handle */ 
    memcpy(responsePacket, &responseHeader, sizeof(struct header));
    packetIter += sizeof(struct header);
    *packetIter++ = destHandleLength;
-   memcpy(responsePacket, &destHandle, destHandleLength);
+   memcpy(packetIter, &destHandle, destHandleLength);
 
    /* Send the response packet */ 
    int sent = send(socket, responsePacket, ntohs(responseHeader.length), 0);
@@ -291,7 +295,11 @@ void handleClientMessage(int socket, char *packet) {
       printf("Error sending message response \n");
    }
 
-   printf("Sent message response packet to %d with length %d\n", socket, ntohs(responseHeader.length));
+   printf("Sent message response packet to %d with length %d\n", 
+         socket, ntohs(responseHeader.length));
+
+   struct header *tmpHeader = (struct header *) responsePacket;
+   printf("Flag after sending: %d\n", tmpHeader->flag); 
 
    if (validDest) {
       /* Forward the message to dest if valid dest handle */
@@ -310,12 +318,11 @@ void handleClientMessage(int socket, char *packet) {
 void handleClientExit(int socket, char *packet) {
    printf("Sending exit ack to socket: %d\n", socket);
    
-   struct header *packetHeader = (struct header *) packet;
    int sent;
 
    /* Prepare the ack packet */ 
    struct header *ackPacket = (struct header *) malloc(sizeof(struct header));
-   ackPacket->sequence = packetHeader->sequence;
+   ackPacket->sequence = tcpServer.sequence++;
    ackPacket->length = htons(sizeof(struct header));
    ackPacket->flag = 9;
    
