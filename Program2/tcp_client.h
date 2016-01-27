@@ -2,7 +2,7 @@
 #define MAX_HANDLE_LENGTH 255
 #define MAX_SERVER_NAME_LENGTH 255
 #define BUFFER_SIZE 1024
-#define MAX_MESSAGE 32768
+#define MAX_MESSAGE_LENGTH 32768
 
 int validateParams(int argc, char *argv[]);
 void initClient(char *argv[]);

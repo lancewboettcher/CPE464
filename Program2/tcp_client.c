@@ -197,11 +197,11 @@ void handleServerActivity() {
 void handleKeyboardInput() {
    printf("\nHandling keyboard input \n"); 
 
-   char buffer[MAX_MESSAGE];
+   char buffer[MAX_MESSAGE_LENGTH];
    int inputLength;
    
    inputLength = 0;
-   while ((buffer[inputLength] = getchar()) != '\n' && inputLength < MAX_MESSAGE)
+   while ((buffer[inputLength] = getchar()) != '\n' && inputLength < MAX_MESSAGE_LENGTH)
       inputLength++;
 
    buffer[inputLength] = '\0';
@@ -249,18 +249,32 @@ void sendMessage(char *userInput) {
    char *handle = userInput + 3;
    char *message = handle;
 
-   while (*message != ' ')
+   while (*message != '\0' && *message != ' ')
       message++;
-   
-   /* Replace space with NULL */  
+
+   /* No handle given */ 
+   if (*message == '\0') {
+      printf("Error, no handle given\n");
+      return;
+   }
+
+   /* Replace space with NULL to split handle and message */  
    *message++ = '\0';
+
+   /* Make sure message isnt too long */
+   int messageLength = strlen(message); 
+   if (messageLength > MAX_MESSAGE_LENGTH) {
+      printf("Message is %d bytes, this is too long. Message truncated to 32kbytes\n", 
+            messageLength);
+      message[MAX_MESSAGE_LENGTH] = '\0';
+   }
 
    printf("Dest handle: '%s' message: '%s'\n", handle, message);
 
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(handle) + 
-      strlen(message) + strlen(tcpClient.handle) + 3);
+      messageLength + strlen(tcpClient.handle) + 3);
    header.flag = 5;
 
    char *packetHead = malloc(ntohs(header.length));
@@ -281,7 +295,7 @@ void sendMessage(char *userInput) {
    packet += strlen(tcpClient.handle);
 
    /* Copy the message */ 
-   memcpy(packet, message, strlen(message) + 1);
+   memcpy(packet, message, messageLength + 1);
 
    /* now send the data */
    int sent = send(tcpClient.socketNum, packetHead, ntohs(header.length), 0);
@@ -379,7 +393,7 @@ void handleBroadcast(char *packet) {
    char *packetIter = packet;
    uint8_t srcHandleLength;
    char srcHandle[MAX_HANDLE_LENGTH];
-   char message[MAX_MESSAGE];
+   char message[MAX_MESSAGE_LENGTH];
 
    /* Skip header */ 
    packetIter += sizeof(struct header);
@@ -402,7 +416,7 @@ void handleMessage(char *packet) {
    char *packetIter = packet;
    uint8_t destHandleLength, srcHandleLength;
    char srcHandle[MAX_HANDLE_LENGTH];
-   char message[MAX_MESSAGE];
+   char message[MAX_MESSAGE_LENGTH];
 
    /* Skip header */ 
    packetIter += sizeof(struct header);
