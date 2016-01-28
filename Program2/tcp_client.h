@@ -5,6 +5,7 @@
 #define MAX_MESSAGE_LENGTH 32768
 #define MAX_MESSAGE_PER_PACKET 800
 #define MAX_PACKET_SIZE 1024
+#define MAX_MESSAGES_QUEUED 50
 
 int validateParams(int argc, char *argv[]);
 void initClient(char *argv[]);
@@ -12,7 +13,7 @@ void runClient();
 void handleServerActivity();
 void handleKeyboardInput();
 void sendMessage(char *userInput);
-void createAndSendMessagePacket(char *handle, char *message, int messageLength);
+void queueMessagePacket(char *handle, char *message, int messageLength);
 void sendBroadcast(char *buffer);
 void listHandles();
 void exitClient();
@@ -33,4 +34,7 @@ struct tcpClient {
    int sequence;
    fd_set openFds;
    uint32_t numHandles;
+   char *messageQueue[MAX_MESSAGES_QUEUED];
+   int numMessagesQueued;
+   int queueIndex;
 };

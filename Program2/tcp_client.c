@@ -102,6 +102,9 @@ void initClient(char *argv[]) {
    else {
       printf("Init reply returned unknown flag: %u\n", initReply->flag);
    }
+
+   tcpClient.numMessagesQueued = 0;
+   tcpClient.queueIndex = 0;
 }   
 
 void runClient() {
@@ -293,14 +296,27 @@ void sendMessage(char *userInput) {
 
       printf("Message length: %d buffer: %s\n", thisMessageLength, messageBuffer);
 
-      createAndSendMessagePacket(handle, messageBuffer, thisMessageLength);
+      queueMessagePacket(handle, messageBuffer, thisMessageLength);
 
       messageIter += thisMessageLength;
       remainingMessageLength -= thisMessageLength; 
    }
+
+   /* Send the first message packet */ 
+   struct header *messageHeader = (struct header *) tcpClient.messageQueue[0];
+   int sent = send(tcpClient.socketNum, tcpClient.messageQueue[0], ntohs(messageHeader->length), 0);
+   if (sent < 0) {
+      perror("Error sending message packet to server\n");
+      exit(-1);
+   }
+
+   printf("Sent a packet length: %hu flag: %u\n", ntohs(messageHeader->length), messageHeader->flag);
+
+   tcpClient.queueIndex = 1;
+  // tcpClient.numMessagesQueued;
 }
 
-void createAndSendMessagePacket(char *handle, char *message, int messageLength) {
+void queueMessagePacket(char *handle, char *message, int messageLength) {
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(handle) + 
@@ -327,20 +343,13 @@ void createAndSendMessagePacket(char *handle, char *message, int messageLength) 
    /* Copy the message */ 
    memcpy(packet, message, messageLength + 1);
 
-   /* now send the data */
-   int sent = send(tcpClient.socketNum, packetHead, ntohs(header.length), 0);
-   if (sent < 0) {
-      perror("Error sending message packet to server\n");
-      exit(-1);
-   }
+   /* Add the packet to the queue */ 
+   tcpClient.messageQueue[tcpClient.numMessagesQueued] = packetHead;
 
-   printf("Sent message to server with length: %hu \n", ntohs(header.length));
+   printf("added packet to queue at index %d \n", tcpClient.numMessagesQueued);
+  // printf("packet: %p, queue[]: %p\n", packet, tcpClient.messageQueue[tcpClient.numMessagesQueued]);
 
-   struct header *afterHeader = (struct header *) packetHead;
-
-   printf("AFTER: header length: %hu, header flag: %u \n", ntohs(afterHeader->length), afterHeader->flag);
-
-   waitFor(2);
+   tcpClient.numMessagesQueued++;
 }
 
 void sendBroadcast(char *buffer) {
@@ -476,6 +485,24 @@ void handleMessage(char *packet) {
 void ackValidMessage(char *packet) {
    printf("Ack valid message recieved\n");
 
+   if (tcpClient.queueIndex < tcpClient.numMessagesQueued) {
+      int index = tcpClient.queueIndex++; 
+
+      struct header *messageHeader = (struct header *) tcpClient.messageQueue[index];
+      int sent = send(tcpClient.socketNum, tcpClient.messageQueue[index], ntohs(messageHeader->length), 0);
+      if (sent < 0) {
+         perror("Error sending message packet to server\n");
+         exit(-1);
+      }
+      printf("Sent message at index %d from the queue \n", index);
+      
+      if (tcpClient.queueIndex == tcpClient.numMessagesQueued) {
+         tcpClient.queueIndex = 0;
+         tcpClient.numMessagesQueued = 0;
+
+         printf("Reset the queue\n");
+      }
+   }
 }
 
 void ackErrorMessage(char *packet) {
