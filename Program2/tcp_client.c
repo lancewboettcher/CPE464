@@ -281,6 +281,9 @@ void sendMessage(char *userInput) {
    char *messageIter = message;
    char messageBuffer[MAX_MESSAGE_PER_PACKET + 1];
 
+   //TODO Maybe dont do this
+   tcpClient.numMessagesQueued = 0;
+
    while (remainingMessageLength > 0) {
       printf("Sending message. Remaining: %d\n", remainingMessageLength);
       
@@ -350,6 +353,8 @@ void queueMessagePacket(char *handle, char *message, int messageLength) {
   // printf("packet: %p, queue[]: %p\n", packet, tcpClient.messageQueue[tcpClient.numMessagesQueued]);
 
    tcpClient.numMessagesQueued++;
+
+   waitFor(2);
 }
 
 void sendBroadcast(char *buffer) {
@@ -495,6 +500,7 @@ void ackValidMessage(char *packet) {
          exit(-1);
       }
       printf("Sent message at index %d from the queue \n", index);
+      printf("Length: %hu, flag: %u\n", ntohs(messageHeader->length), messageHeader->flag);
       
       if (tcpClient.queueIndex == tcpClient.numMessagesQueued) {
          tcpClient.queueIndex = 0;
