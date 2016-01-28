@@ -23,6 +23,8 @@
 #include "tcp_client.h"
 #include "packets.h"
 
+#include <time.h>
+
 struct tcpClient tcpClient;
 
 int main(int argc, char * argv[]) {
@@ -146,11 +148,12 @@ void handleServerActivity() {
       printf("Server Terminated\n");
       exit(-1);
    }
+
    else {
       printf("Message recieved from server, length: %d\n", messageLength);
 
       struct header *header = (struct header *) buffer;
-      printf("Flag: %u\n", header->flag);
+      printf("Flag: %u, totalLength: %hu\n", header->flag, ntohs(header->length));
 
       switch (header->flag) {
          case 4: 
@@ -188,7 +191,7 @@ void handleServerActivity() {
             handlesResponse(buffer);
 
             break;
-         default: 
+         default:
             printf("Unknown flag from server: %d\n", header->flag);
       }   
    }
@@ -269,8 +272,35 @@ void sendMessage(char *userInput) {
       message[MAX_MESSAGE_LENGTH] = '\0';
    }
 
-   printf("Dest handle: '%s' message: '%s'\n", handle, message);
+   printf(" Dest handle: '%s' message: '%s'\n", handle, message);
 
+   int remainingMessageLength = messageLength, thisMessageLength; 
+   char *messageIter = message;
+   char messageBuffer[MAX_MESSAGE_PER_PACKET + 1];
+
+   while (remainingMessageLength > 0) {
+      printf("Sending message. Remaining: %d\n", remainingMessageLength);
+      
+      if (remainingMessageLength > MAX_MESSAGE_PER_PACKET) {
+         thisMessageLength = MAX_MESSAGE_PER_PACKET;
+      }
+      else {
+         thisMessageLength = remainingMessageLength;
+      }
+
+      memcpy(messageBuffer, messageIter, thisMessageLength);
+      messageBuffer[thisMessageLength] = '\0';
+
+      printf("Message length: %d buffer: %s\n", thisMessageLength, messageBuffer);
+
+      createAndSendMessagePacket(handle, messageBuffer, thisMessageLength);
+
+      messageIter += thisMessageLength;
+      remainingMessageLength -= thisMessageLength; 
+   }
+}
+
+void createAndSendMessagePacket(char *handle, char *message, int messageLength) {
    struct header header;
    header.sequence = tcpClient.sequence++;
    header.length = htons(sizeof(struct header) + strlen(handle) + 
@@ -304,7 +334,13 @@ void sendMessage(char *userInput) {
       exit(-1);
    }
 
-   printf("Sent message to server with length: %d\n", ntohs(header.length));
+   printf("Sent message to server with length: %hu \n", ntohs(header.length));
+
+   struct header *afterHeader = (struct header *) packetHead;
+
+   printf("AFTER: header length: %hu, header flag: %u \n", ntohs(afterHeader->length), afterHeader->flag);
+
+   waitFor(2);
 }
 
 void sendBroadcast(char *buffer) {
@@ -539,3 +575,8 @@ int tcp_send_setup(char *host_name, char *port) {
    return socket_num;
 }
 
+
+void waitFor (unsigned int secs) {
+       unsigned int retTime = time(0) + secs;     // Get finishing time.
+           while (time(0) < retTime);    // Loop until it arrives.
+}

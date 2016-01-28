@@ -112,19 +112,17 @@ void handleActiveClient(int activeClient) {
       exit(-1);
    }
 
-   printf("Message recieved\n");
-
    /* Client disconnected */ 
    if (messageLength == 0) //TODO dont remove on invalid client handle disconnect 
       removeClient(activeClient);
 
    else {
       /* Read message */  
-      printf("Message received, length: %d\n", messageLength);
+      printf("Message received, read length: %d\n", messageLength);
       printf("Data: %s\n", buffer);
 
       struct header *header = (struct header *)buffer;
-      printf("Flag: %u\n", header->flag);
+      printf("Flag: %u, header length: %hu\n", header->flag, ntohs(header->length));
 
       switch (header->flag) {
          case 1:
