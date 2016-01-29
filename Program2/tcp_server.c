@@ -136,7 +136,7 @@ void handleActiveClient(int activeClient) {
             break;
          case 5: 
             /* Message packet */ 
-            handleClientMessage(activeClient, buffer);
+            handleClientMessage(activeClient, buffer, messageLength);
 
             break;
          case 8:
@@ -238,7 +238,7 @@ void handleClientBroadcast(int socket, char *packet) {
    }
 }
 
-void handleClientMessage(int socket, char *packet) {
+void handleClientMessage(int socket, char *packet, int lengthReceived) {
    printf("\nHandling client message from %d \n", socket);
 
    char *packetIter = packet;
@@ -296,20 +296,44 @@ void handleClientMessage(int socket, char *packet) {
    printf("Sent message response packet to %d with length %d\n", 
          socket, ntohs(responseHeader.length));
 
-   struct header *tmpHeader = (struct header *) responsePacket;
-   printf("Flag after sending: %d\n", tmpHeader->flag); 
-
+   
    if (validDest) {
       /* Forward the message to dest if valid dest handle */
       int destSocket = getClientSocket(destHandle); 
-      sent = send(destSocket, packet, ntohs(header->length), 0);
+      int lengthRemaining = ntohs(header->length) - lengthReceived;
+      int messageLength;
+      char *buffer[BUFFER_SIZE];
+
+      sent = send(destSocket, packet, lengthReceived, 0);
 
       if (sent < 0) {
-         printf("Error sending message response \n");
-      } 
-
+         printf("Error Forwarding message\n");
+      }
       printf("Forwarded message to handle: %s, socket: %d length: %d\n", 
-            destHandle, destSocket, ntohs(header->length));
+         destHandle, destSocket, lengthReceived);  
+
+      while (lengthRemaining > 0) {
+         printf("Length remaining: %d\n", lengthRemaining);
+
+         if ((messageLength = recv(socket, buffer, BUFFER_SIZE, 0)) < 0) {
+            perror("Error receiving overflow message\n");
+            exit(-1);
+         }
+         if (messageLength == 0) {
+            printf("Client terminated while receiving overflow\n");
+         }
+
+         sent = send(destSocket, buffer, messageLength, 0);
+
+         if (sent < 0) {
+            printf("Error Forwarding message \n");
+         } 
+
+         printf("Forwarded overflow message to handle: %s, socket: %d length: %d\n", 
+               destHandle, destSocket, messageLength);
+
+         lengthRemaining -= messageLength;
+      }
    }
 }
 
