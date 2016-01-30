@@ -2,6 +2,7 @@
  * tcp_server.c
  *
  * CPE 464 - Program 1
+ * Lance Boettcher
  *****************************************************************************/
 
 #include <stdio.h>
@@ -21,6 +22,7 @@
 #include "networks.h"
 #include "tcp_server.h"
 #include "packets.h"
+#include "testing.h"
 
 struct tcpServer tcpServer;
 
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
 
    runServer();
 
-    return 0;
+   return 0;
 }
 
 void initServer(int argc, char *argv[]) {
@@ -66,9 +68,9 @@ void runServer() {
 
          clientIterator = clientIterator->next;
       }   
-     //TODO DO we need max? or FD_SETSIZE 
+      
       /* Wait for something to happen */ 
-      if (select(max + 1 , &tcpServer.openFds , NULL , NULL , NULL) < 0) {
+      if (select(max + 1, &tcpServer.openFds , NULL , NULL , NULL) < 0) {
          perror("Error with select\n");
          exit(-1);
       }
@@ -85,8 +87,6 @@ void runServer() {
 
          /* Add the new client to our list */
          addClient(newClient);
-
-         printf("Added new client: %d \n", newClient);
       }
 
       /* If other client active -> handle it */ 
@@ -105,24 +105,18 @@ void handleActiveClient(int activeClient) {
    int messageLength;
    char buffer[BUFFER_SIZE];
 
-   printf("\nHandling Client: %d\n", activeClient);
-
    if ((messageLength = recv(activeClient, buffer, BUFFER_SIZE, 0)) < 0) {
       perror("Error reading active client \n");
       exit(-1);
    }
 
    /* Client disconnected */ 
-   if (messageLength == 0) //TODO dont remove on invalid client handle disconnect 
+   if (messageLength == 0) 
       removeClient(activeClient);
 
    else {
       /* Read message */  
-      printf("Message received, read length: %d\n", messageLength);
-      printf("Data: %s\n", buffer);
-
       struct header *header = (struct header *)buffer;
-      printf("Flag: %u, header length: %hu\n", header->flag, ntohs(header->length));
 
       switch (header->flag) {
          case 1:
@@ -150,8 +144,6 @@ void handleActiveClient(int activeClient) {
             handleClientListHandles(activeClient, buffer);
 
             break;
-         default: 
-            printf("Unknown flag recieved: %u\n", header->flag);
       }
    }
 }
@@ -166,8 +158,6 @@ void handleClientInit(int socket, char *packet) {
          initPacket->handleLength);
    handle[initPacket->handleLength] = '\0';
 
-   printf("\nHandling init from socket: %d, handle: %s\n", socket, handle);
-
    ackPacket = (struct header *) malloc(sizeof(struct header));
    ackPacket->sequence = tcpServer.sequence++;
    ackPacket->length = htons(sizeof(struct header));
@@ -178,7 +168,6 @@ void handleClientInit(int socket, char *packet) {
    }
    else {
       /* Valid handle, update list and send approval to client */
-      printf("Setting handle of socket %d to '%s'\n", socket, handle);
 
       setHandle(socket, handle);
       ackPacket->flag = 2;
@@ -193,8 +182,6 @@ void handleClientInit(int socket, char *packet) {
 }   
 
 void handleClientBroadcast(int socket, char *packet) {
-   printf("Handling client broadcast from %d \n", socket);
-
    char *packetIter = packet;
    int destSocket, srcSocket, sent;
    struct client *clientIterator;
@@ -212,8 +199,6 @@ void handleClientBroadcast(int socket, char *packet) {
 
    srcSocket = getClientSocket(srcHandle);
 
-   printf("Broadcasting message to %d clients\n", tcpServer.numClients);
- 
    /* Forward the packet to all clients */ 
    clientIterator = tcpServer.clientList;
    while (clientIterator != NULL) {
@@ -231,16 +216,11 @@ void handleClientBroadcast(int socket, char *packet) {
          printf("Error sending broadcast \n");
       } 
 
-      printf("Forwarded broadcast message to socket: %d length: %d\n", 
-            destSocket, ntohs(packetHeader->length));
-
       clientIterator = clientIterator->next;
    }
 }
 
 void handleClientMessage(int socket, char *packet, int lengthReceived) {
-   printf("\nHandling client message from %d \n", socket);
-
    char *packetIter = packet;
    char *responsePacket;
    struct header responseHeader;
@@ -264,8 +244,6 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
    if (!existingHandle(destHandle)) {
       /* handle does not exist, send flag = 7 back */
       
-      printf("Handle: '%s' does not exist\n", destHandle);
-
       responseHeader.flag = 7;
       validDest = 0;
    }
@@ -277,8 +255,6 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
 
    responsePacket = malloc(sizeof(struct header) + destHandleLength + 1);
    packetIter = responsePacket;
-
-   printf("Creating response packet. flag: %d\n", responseHeader.flag);
 
    /* Copy the dest handle length and handle */ 
    memcpy(responsePacket, &responseHeader, sizeof(struct header));
@@ -293,10 +269,6 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
       printf("Error sending message response \n");
    }
 
-   printf("Sent message response packet to %d with length %d\n", 
-         socket, ntohs(responseHeader.length));
-
-   
    if (validDest) {
       /* Forward the message to dest if valid dest handle */
       int destSocket = getClientSocket(destHandle); 
@@ -309,9 +281,7 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
       if (sent < 0) {
          printf("Error Forwarding message\n");
       }
-      printf("Forwarded message to handle: %s, socket: %d length: %d\n", 
-         destHandle, destSocket, lengthReceived);  
-
+      
       while (lengthRemaining > 0) {
          printf("Length remaining: %d\n", lengthRemaining);
 
@@ -320,17 +290,14 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
             exit(-1);
          }
          if (messageLength == 0) {
-            printf("Client terminated while receiving overflow\n");
+            perror("Client terminated while receiving overflow\n");
          }
 
          sent = send(destSocket, buffer, messageLength, 0);
 
          if (sent < 0) {
-            printf("Error Forwarding message \n");
+            perror("Error Forwarding message \n");
          } 
-
-         printf("Forwarded overflow message to handle: %s, socket: %d length: %d\n", 
-               destHandle, destSocket, messageLength);
 
          lengthRemaining -= messageLength;
       }
@@ -338,8 +305,6 @@ void handleClientMessage(int socket, char *packet, int lengthReceived) {
 }
 
 void handleClientExit(int socket, char *packet) {
-   printf("Sending exit ack to socket: %d\n", socket);
-   
    int sent;
 
    /* Prepare the ack packet */ 
@@ -357,8 +322,6 @@ void handleClientExit(int socket, char *packet) {
 }
 
 void handleClientListHandles(int socket, char *packet) {
-   printf("Handling list handles for socket %d\n", socket);
-
    struct header responseHeader;
    char *responsePacket, *packetIter;
    int sent, totalHandleLength = 0;
@@ -380,18 +343,12 @@ void handleClientListHandles(int socket, char *packet) {
    /* Copy the number of handles */ 
    *(uint32_t *)packetIter = htonl(tcpServer.numClients);
    
-   printf("Num handles tcpServer.numClients: %d packetIter: %d\n",
-         tcpServer.numClients, *(uint32_t *) packetIter);
-
-
    /* Send the num handles packet */ 
    sent = send(socket, responsePacket, ntohs(responseHeader.length), 0);
 
    if (sent < 0) {
       printf("Error sending list handle number message response \n");
    } 
-
-   printf("Sent num handles packet. Num handles: %d\n", tcpServer.numClients);
 
    /* Prepare flag = 12 packet */ 
    responseHeader.sequence = tcpServer.sequence++;
@@ -423,9 +380,6 @@ void handleClientListHandles(int socket, char *packet) {
    if (sent < 0) {
       printf("Error sending list handle handles response \n");
    } 
-
-   printf("Sent handles packet. total handle length: %d\n", totalHandleLength);
-   
 }
 
 int existingHandle(char *handle) {
@@ -473,8 +427,6 @@ int getClientSocket(char *handle) {
 }
 
 void addClient(int socket) {
-   printf("Adding client with socket: %d\n", socket);
-
    struct client *newClient = (struct client *) malloc(sizeof(struct client));
    newClient->socket = socket;
    newClient->next = NULL;
@@ -494,8 +446,6 @@ void addClient(int socket) {
 }
 
 void removeClient(int socket) {
-   printf("Removing client: %d\n", socket);
-
    struct client *iterator = tcpServer.clientList;
 
    if (iterator->next == NULL) {
@@ -555,7 +505,7 @@ int tcp_recv_setup(int portNumber)
 	exit(-1);
       }
 
-    printf("socket has port %d \n", ntohs(local.sin_port));
+    printf("Server is using port %d\n", ntohs(local.sin_port));
 	        
     return server_socket;
 }

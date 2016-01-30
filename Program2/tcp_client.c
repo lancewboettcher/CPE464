@@ -23,8 +23,6 @@
 #include "tcp_client.h"
 #include "packets.h"
 
-#include <time.h>
-
 struct tcpClient tcpClient;
 
 int main(int argc, char * argv[]) {
@@ -87,9 +85,7 @@ void initClient(char *argv[]) {
       exit(-1);
    }
    
-   printf("Init reply length: %d\n", responseLength);
    struct header *initReply = (struct header *) buffer;
-   printf("flag: %u\n", initReply->flag);
    
    if (initReply->flag == 3) {
       /* Handle in use */
@@ -97,18 +93,19 @@ void initClient(char *argv[]) {
       exit(-1);
    }
    else if (initReply->flag == 2) {
-      printf("Valid Handle\n");
+      /* Valid handle */ 
    }
    else {
-      printf("Init reply returned unknown flag: %u\n", initReply->flag);
+      perror("Init reply returned unknown flag\n");
+      exit(-1);
    }
+
+   printf("$:");
+   fflush(stdout);
 }   
 
 void runClient() {
    while (1) {
-      printf("$:");
-      fflush(stdout);
-
       FD_ZERO(&tcpClient.openFds);
       FD_SET(tcpClient.socketNum, &tcpClient.openFds);
 
@@ -134,13 +131,11 @@ void runClient() {
 }
 
 void handleServerActivity() {
-   printf("\nHandling server activity\n");
-
    int messageLength;
    char buffer[BUFFER_SIZE];
 
    if ((messageLength = recv(tcpClient.socketNum, buffer, BUFFER_SIZE, 0)) < 0) {
-      perror("Error recieving from active server\n");
+      perror("Error receiving from active server\n");
       exit(-1);
    }
 
@@ -150,11 +145,8 @@ void handleServerActivity() {
    }
 
    else {
-      printf("Message recieved from server, length: %d\n", messageLength);
-
       struct header *header = (struct header *) buffer;
-      printf("Flag: %u, totalLength: %hu\n", header->flag, ntohs(header->length));
-
+      
       switch (header->flag) {
          case 4: 
             /* Broadcast */ 
@@ -191,15 +183,11 @@ void handleServerActivity() {
             handlesResponse(buffer, messageLength);
 
             break;
-         default:
-            printf("Unknown flag from server: %d\n", header->flag);
       }   
    }
 }
 
 void handleKeyboardInput() {
-   printf("\nHandling keyboard input \n"); 
-
    char buffer[MAX_MESSAGE_LENGTH];
    int inputLength;
    
@@ -209,10 +197,11 @@ void handleKeyboardInput() {
 
    buffer[inputLength] = '\0';
 
-   printf("Client input: %s\n", buffer);
-
    if (buffer[0] != '%') {
       printf("Invalid Command\n");
+
+      printf("$:");
+      fflush(stdout);
    }
    else {
       switch (buffer[1]) {
@@ -245,34 +234,43 @@ void handleKeyboardInput() {
 /* Client to server handlers */ 
 
 void sendMessage(char *userInput) {
-   
-   printf("\nSending Message\n");
-
    /* Skip %M */ 
    char *handle = userInput + 3;
    char *message = handle;
 
-   while (*message != '\0' && *message != ' ')
-      message++;
-
    /* No handle given */ 
-   if (*message == '\0') {
+   if (*(handle - 1) == '\0' || *handle == '\0') {
       printf("Error, no handle given\n");
+
+      printf("$:");
+      fflush(stdout);
+
       return;
    }
 
-   /* Replace space with NULL to split handle and message */  
-   *message++ = '\0';
+   while (*message != '\0' && *message != ' ')
+      message++;
+
+   if (*message == '\0') {
+      message = " ";
+   }
+   else { 
+      /* Replace space with NULL to split handle and message */  
+      *message++ = '\0';
+   }
 
    /* Make sure message isnt too long */
    int messageLength = strlen(message); 
    if (messageLength > MAX_MESSAGE_LENGTH) {
-      printf("Message is %d bytes, this is too long. Message truncated to 32kbytes\n", 
+      printf("\nMessage is %d bytes, this is too long. Message truncated to 32kbytes\n", 
             messageLength);
       message[MAX_MESSAGE_LENGTH] = '\0';
    }
 
    createAndSendMessagePacket(handle, message, messageLength);
+
+   printf("$:");
+   fflush(stdout);
 }
 
 void createAndSendMessagePacket(char *handle, char *message, int messageLength) {
@@ -307,20 +305,21 @@ void createAndSendMessagePacket(char *handle, char *message, int messageLength) 
       perror("Error sending message packet to server\n");
       exit(-1);
    }
-
-   printf("Sent a packet length: %hu flag: %u\n", ntohs(header.length), header.flag);
 }
 
 void sendBroadcast(char *buffer) {
-   printf("Sending Broadcast\n");
-
    /* Skip %B */ 
    char *message = buffer + 2;
 
-   /* Replace space with NULL */  
-   *message++ = '\0';
+   if (strlen(message) == 0) {
+      /* If no message, send a blank space */ 
 
-   printf("Broadcast message: '%s'\n", message);
+      message = " ";
+   }
+   else {
+      /* Replace space with NULL */  
+      *message++ = '\0';
+   }
 
    struct header header;
    header.sequence = tcpClient.sequence++;
@@ -350,12 +349,11 @@ void sendBroadcast(char *buffer) {
       exit(-1);
    }
 
-   printf("Sent message to server with length: %d\n", ntohs(header.length));
+   printf("$:");
+   fflush(stdout);
 }
 
 void listHandles() {
-   printf("Listing Handles\n");
-
    struct header *header = (struct header *) malloc(sizeof(struct header));
 
    header->sequence = tcpClient.sequence++;
@@ -367,13 +365,9 @@ void listHandles() {
       perror("Error sending exit packet to server\n");
       exit(-1);
    }
-
-   printf("Sent list handles request to server with length: %d\n", ntohs(header->length));
 }
 
 void exitClient() {
-   printf("Client Exiting\n");
-
    struct header *header = (struct header *) malloc(sizeof(struct header));
 
    header->sequence = tcpClient.sequence++;
@@ -385,15 +379,11 @@ void exitClient() {
       perror("Error sending exit packet to server\n");
       exit(-1);
    }
-
-   printf("Sent exit to server with length: %d\n", ntohs(header->length));
 }
 
 /* Server to client handlers */
 
 void handleBroadcast(char *packet, int lengthReceived) {
-   printf("\nRecieved broadcast from another client\n");
-
    char *packetIter = packet;
    uint8_t srcHandleLength;
    char srcHandle[MAX_HANDLE_LENGTH];
@@ -418,8 +408,6 @@ void handleBroadcast(char *packet, int lengthReceived) {
 }
 
 void handleMessage(char *packet, int lengthReceived) {
-   printf("\nRecieved message from another client\n");
-
    char *packetIter = packet;
    uint8_t destHandleLength, srcHandleLength;
    char srcHandle[MAX_HANDLE_LENGTH];
@@ -458,11 +446,7 @@ void printMessage(char *packetIter, int lengthReceived, int lengthRemaining,
 
    memcpy(message, packetIter, thisMessageLength);
  
-   printf("Before while Length remaining: %d\n", lengthRemaining);
-   
    while (lengthRemaining > 0) {
-
-      printf("Length remaining: %d\n", lengthRemaining);
 
       if ((messageLength = recv(tcpClient.socketNum, buffer, BUFFER_SIZE, 0)) < 0) {
          perror("Error recieving from active server\n");
@@ -478,17 +462,16 @@ void printMessage(char *packetIter, int lengthReceived, int lengthRemaining,
       lengthRemaining -= messageLength;
    }
 
-   printf("%s: %s\n", srcHandle, message);
+   printf("\n%s: %s\n", srcHandle, message);
+   printf("$:");
+   fflush(stdout);
 }
 
 void ackValidMessage(char *packet) {
-   printf("Ack valid message recieved\n");
-
+   /* Nothing to do here */ 
 }
 
 void ackErrorMessage(char *packet) {
-   printf("Ack message error recieved\n");
-
    char *packetIter = packet;
    uint8_t handleLength;
    char handle[MAX_HANDLE_LENGTH];
@@ -499,29 +482,26 @@ void ackErrorMessage(char *packet) {
    memcpy(handle, packetIter, handleLength);
    handle[handleLength] = '\0';
 
-   printf("Client with handle %s does not exist\n", handle);
+   printf("\nClient with handle %s does not exist\n", handle);
+
+   printf("$:");
+   fflush(stdout);
 }
 
 void ackExit(char *packet) {
-   printf("Ack Exit recieved\n");
-  
    exit(0); 
 }
 
 void numHandlesResponse(char *packet) {
-   printf("Num handles response recieved\n");
-
    char *packetIter = packet;
    packetIter += sizeof(struct header);
 
    tcpClient.numHandles = ntohl(*((uint32_t *) packetIter));
 
-   printf("Num handles: %d", tcpClient.numHandles);
+   printf("Num handles: %d\n", tcpClient.numHandles);
 }
 
 void handlesResponse(char *packet, int lengthReceived) {
-   printf("Handles response recieved\n");
-
    int i, lengthRemaining, messageLength;
    char *packetIter = packet;
    char *endOfPacket = packet + lengthReceived;
@@ -534,8 +514,6 @@ void handlesResponse(char *packet, int lengthReceived) {
    for (i = 0; i < tcpClient.numHandles; i++) {
       /* Get next packet if we have to */
       if (packetIter == endOfPacket) {
-         printf("Getting the next packet. No split \n");
-
          if ((messageLength = recv(tcpClient.socketNum, buffer, BUFFER_SIZE, 0)) < 0) {
             perror("Error recieving from active server\n");
             exit(-1);
@@ -560,8 +538,6 @@ void handlesResponse(char *packet, int lengthReceived) {
       }
       else {
          /* Handle split between packets */
-         printf("Handles split. Getting more\n");
-
          int partialLength = endOfPacket - packetIter;
 
          memcpy(handleBuffer, packetIter, partialLength);
@@ -593,6 +569,9 @@ void handlesResponse(char *packet, int lengthReceived) {
       /* Clear the buffer */ 
       memset(handleBuffer, '\0', MAX_HANDLE_LENGTH);
    }
+
+   printf("$:");
+   fflush(stdout);
 }
 
 /* Helpers */ 
@@ -631,10 +610,4 @@ int tcp_send_setup(char *host_name, char *port) {
    }
 
    return socket_num;
-}
-
-
-void waitFor (unsigned int secs) {
-       unsigned int retTime = time(0) + secs;     // Get finishing time.
-           while (time(0) < retTime);    // Loop until it arrives.
 }
