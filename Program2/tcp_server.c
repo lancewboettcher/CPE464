@@ -378,7 +378,7 @@ void handleClientListHandles(int socket, char *packet) {
    packetIter += sizeof(struct header);
 
    /* Copy the number of handles */ 
-   *(uint32_t *)packetIter = tcpServer.numClients;
+   *(uint32_t *)packetIter = htonl(tcpServer.numClients);
    
    printf("Num handles tcpServer.numClients: %d packetIter: %d\n",
          tcpServer.numClients, *(uint32_t *) packetIter);
@@ -398,7 +398,7 @@ void handleClientListHandles(int socket, char *packet) {
    responseHeader.length = 0; //This is supposed to be zero
    responseHeader.flag = 12;
 
-   responsePacket = malloc(BUFFER_SIZE);//TODO change this
+   responsePacket = malloc(BUFFER_SIZE);
    packetIter = responsePacket;
 
    /* Copy the header */ 

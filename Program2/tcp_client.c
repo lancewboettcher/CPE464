@@ -63,7 +63,7 @@ void initClient(char *argv[]) {
    tcpClient.socketNum = tcp_send_setup(argv[2], argv[3]);
 
    /* Prepare init packet header */ 
-   initPacket.header.sequence = tcpClient.sequence = 0;
+   initPacket.header.sequence = tcpClient.sequence = 1;
    initPacket.header.length = htons(sizeof(struct initCtoS) + initPacket.handleLength);
    initPacket.header.flag = 1;
 
@@ -273,31 +273,6 @@ void sendMessage(char *userInput) {
    }
 
    createAndSendMessagePacket(handle, message, messageLength);
-
-/*
-
-   printf(" Dest handle: '%s' message: '%s'\n", handle, message);
-
-   int remainingMessageLength = messageLength, thisMessageLength; 
-   char *messageIter = message;
-   char messageBuffer[MAX_MESSAGE_PER_PACKET + 1];
-
-   while (remainingMessageLength > 0) {
-      printf("Sending message. Remaining: %d\n", remainingMessageLength);
-      
-      if (remainingMessageLength > MAX_MESSAGE_PER_PACKET) {
-         thisMessageLength = MAX_MESSAGE_PER_PACKET;
-      }
-      else {
-         thisMessageLength = remainingMessageLength;
-      }
-
-      memcpy(messageBuffer, messageIter, thisMessageLength);
-      messageBuffer[thisMessageLength] = '\0';
-
-      printf("Message length: %d buffer: %s\n", thisMessageLength, messageBuffer);
-
-   }*/
 }
 
 void createAndSendMessagePacket(char *handle, char *message, int messageLength) {
@@ -539,7 +514,7 @@ void numHandlesResponse(char *packet) {
    char *packetIter = packet;
    packetIter += sizeof(struct header);
 
-   tcpClient.numHandles = *((uint32_t *) packetIter);
+   tcpClient.numHandles = ntohl(*((uint32_t *) packetIter));
 
    printf("Num handles: %d", tcpClient.numHandles);
 }
