@@ -1,0 +1,14 @@
+Init reply length: 7
+flag: 2
+Valid Handle
+$:
+Handling keyboard input 
+Client input: %L
+Listing Handles
+Sent list handles request to server with length: 7
+$:
+Handling server activity
+Message recieved from server, length: 11
+Flag: 11
+Num handles response recieved
+Num handles: 160481537$:
