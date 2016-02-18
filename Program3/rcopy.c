@@ -20,10 +20,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "networks.h"
-#include "tcp_server.h"
-#include "packets.h"
-#include "testing.h"
+#include "rcopy.h"
+#include "cpe464.h"
 
 struct rcopy rcopy;
 
@@ -32,7 +30,7 @@ int main(int argc, char *argv[]) {
 
    initRCopy(argc, argv);
 
-   runServer();
+   sendFile();
 
    return 0;
 }
@@ -40,8 +38,8 @@ int main(int argc, char *argv[]) {
 void validateParams(int argc, char *argv[]) {
 
    if (argc != 8) {
-      printf("Usage: %s local-file remote-file buffer-size error-percent 
-            window-size remote-machine remote-port\n", argv[0]);
+      printf("Usage: %s local-file remote-file buffer-size error-percent"
+            "window-size remote-machine remote-port\n", argv[0]);
       exit(-1);
    }
 
@@ -75,7 +73,7 @@ void initRCopy(int argc, char *argv[]) {
    rcopy.clientSocket = udp_send_setup(argv[6], atoi(argv[7]));
 
    /* Init sequence number */
-   server.sequence = 1;
+   rcopy.sequence = 1;
 }
 
 void sendFile() {
@@ -85,13 +83,12 @@ void sendFile() {
 
 }
 
-int tcp_send_setup(char *host_name, uint16_t *port) {
+int udp_send_setup(char *host_name, int port) {
    int socket_num;
    struct sockaddr_in remote;       // socket address for remote side
    struct hostent *hp;              // address of remote host
    
-   if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-   {
+   if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
       perror("socket call");
       exit(-1);
    }
@@ -100,8 +97,7 @@ int tcp_send_setup(char *host_name, uint16_t *port) {
    remote.sin_family= AF_INET;
 
    // get the address of the remote host and store
-   if ((hp = gethostbyname(host_name)) == NULL)
-   {
+   if ((hp = gethostbyname(host_name)) == NULL) {
       printf("Error getting hostname: %s\n", host_name);
       exit(-1);
    }
@@ -109,7 +105,7 @@ int tcp_send_setup(char *host_name, uint16_t *port) {
    memcpy((char*)&remote.sin_addr, (char*)hp->h_addr, hp->h_length);
 
    // get the port used on the remote side and store
-   remote.sin_port = htons(atoi(port));
+   remote.sin_port = htons(port);
 
    return socket_num;
 }

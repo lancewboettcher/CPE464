@@ -20,10 +20,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include "networks.h"
-#include "tcp_server.h"
-#include "packets.h"
-#include "testing.h"
+#include "server.h"
+#include "cpe464.h"
 
 struct server server;
 
