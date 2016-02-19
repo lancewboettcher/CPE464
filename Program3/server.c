@@ -22,6 +22,7 @@
 
 #include "server.h"
 #include "cpe464.h"
+#include "util.h"
 
 struct server server;
 
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]) {
 void initServer(int argc, char *argv[]) {
    /* Initialize sendtoErr */ 
    if (argc >= 2) // Error Percent
-      sendtoErr_init(atof(argv[1]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON); 
+      sendtoErr_init(atof(argv[1]), DROP_OFF, FLIP_OFF, DEBUG_OFF, RSEED_OFF); 
    else {
       perror("Usage: server <Error Percent> <Port Number (Optional)>");
       exit(-1);
@@ -54,8 +55,13 @@ void initServer(int argc, char *argv[]) {
 
 void runServer() {
 
+   while (1) {
+      if (select_call(server.serverSocket, 1, 0, NOT_NULL) == 1) {
+         printf("New Client\n");
 
+      }
 
+   }
 
 }
 
@@ -77,7 +83,7 @@ int udp_recv_setup(int portNumber) {
    local.sin_port= htons(portNumber);
 
    /* bind the name (address) to a port */
-   if (bind(server_socket, (struct sockaddr *) &local, sizeof(local)) < 0) {
+   if (bindMod(server_socket, (struct sockaddr *) &local, sizeof(local)) < 0) {
       perror("bind call");
       exit(-1);
    }

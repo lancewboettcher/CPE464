@@ -22,17 +22,131 @@
 
 #include "rcopy.h"
 #include "cpe464.h"
+#include "util.h"
 
 struct rcopy rcopy;
+Connection server;
 
 int main(int argc, char *argv[]) {
    validateParams(argc, argv);
 
    initRCopy(argc, argv);
 
-   sendFile();
+   sendFile(argc, argv);
 
    return 0;
+}
+
+void initRCopy(int argc, char *argv[]) {
+   /* Initialize sendtoErr */
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON);
+
+   /* Init sequence number */
+   rcopy.sequence = 1;
+}
+
+void sendFile(int argc, char *argv[]) {
+
+   int32_t select_count = 0;
+   STATE state = FILENAME;
+
+   while (state != DONE) {
+
+      switch (state) {
+         case FILENAME: 
+
+            /* Setup new socket */
+            if ((server.sk_num = udp_send_setup(argv[6], atoi(argv[7]))) < 0) {
+               printf("Host not found\n");
+               exit(-1);
+            }
+
+            state = filename(argv[1], atoi(argv[3]));
+
+            if (state == FILENAME)
+               close(server.sk_num);
+
+            select_count++;
+            if (select_count > 9) {
+               printf("Server unreachable, client terminating\n");
+               state = DONE;
+            }
+
+            break;
+         case FILE_OK: 
+
+
+            break;
+         case RECV: 
+
+
+            break;
+         default: 
+            printf("Error - in default state\n");
+            break;
+      }
+
+   }
+}
+
+STATE filename(char *fname, int32_t buff_size) {
+
+   uint8_t packet[MAX_LEN];
+   uint8_t buf[MAX_LEN];
+   uint8_t flag = 0;
+   int32_t seq_num = 0;
+   int32_t fname_len = strlen(fname) + 1;
+   int32_t recv_check = 0;
+
+   memcpy(buf, &buf_size, 4);
+   memcpy(&buf[4], fname, fname_len);
+
+   send_buf(buf, fname_len + 4, &server, FNAME, 0, packet);
+
+   if (select_call(server.sk_num, 1, 0, NOT_NULL) == 1) {
+
+      recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+
+      if (recv_check == CRC_ERROR) {
+         printf("CRC_ERROR in filename\n");
+         return FILENAME;
+      }
+      if (flag == FNAME_BAD) {
+         printf("File %s not found\n", fname);
+         return DONE;
+      }
+
+      return FILE_OK;
+   }
+
+   return FILENAME;
+}
+
+int udp_send_setup(char *host_name, int port) {
+   int socket_num;
+   struct sockaddr_in remote;       // socket address for remote side
+   struct hostent *hp;              // address of remote host
+   
+   if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      perror("socket call");
+      exit(-1);
+   }
+
+   //designate the addressing family
+   remote.sin_family= AF_INET;
+
+   // get the address of the remote host and store
+   if ((hp = gethostbyname(host_name)) == NULL) {
+      printf("Error getting hostname: %s\n", host_name);
+      exit(-1);
+   }
+
+   memcpy((char*)&remote.sin_addr, (char*)hp->h_addr, hp->h_length);
+
+   // get the port used on the remote side and store
+   remote.sin_port = htons(port);
+
+   return socket_num;
 }
 
 void validateParams(int argc, char *argv[]) {
@@ -63,49 +177,4 @@ void validateParams(int argc, char *argv[]) {
       printf("Window size must be greater than 0\n");
       exit(-1);
    }
-}
-
-void initRCopy(int argc, char *argv[]) {
-   /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON);
-
-   /* Setup  */
-   rcopy.clientSocket = udp_send_setup(argv[6], atoi(argv[7]));
-
-   /* Init sequence number */
-   rcopy.sequence = 1;
-}
-
-void sendFile() {
-
-
-
-
-}
-
-int udp_send_setup(char *host_name, int port) {
-   int socket_num;
-   struct sockaddr_in remote;       // socket address for remote side
-   struct hostent *hp;              // address of remote host
-   
-   if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-      perror("socket call");
-      exit(-1);
-   }
-
-   //designate the addressing family
-   remote.sin_family= AF_INET;
-
-   // get the address of the remote host and store
-   if ((hp = gethostbyname(host_name)) == NULL) {
-      printf("Error getting hostname: %s\n", host_name);
-      exit(-1);
-   }
-
-   memcpy((char*)&remote.sin_addr, (char*)hp->h_addr, hp->h_length);
-
-   // get the port used on the remote side and store
-   remote.sin_port = htons(port);
-
-   return socket_num;
 }
