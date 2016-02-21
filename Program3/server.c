@@ -102,27 +102,27 @@ void processClient(uint8_t *buf, int32_t recv_len, Connection *client) {
       switch(state) {
          case START:
             state = FILENAME;
-            break;
 
+            break;
          case FILENAME:
             printf("\nSTATE = FILENAME\n");
             seq_num = 1;
             state = filename(client, buf, recv_len, &data_file, &buf_size);
-            break;
 
+            break;
          case RECV_DATA:
             printf("\nSTATE = RECV_DATA\n");
-            //state = recv_data(data_file, client);
-            state = DONE;
+            state = recv_data(data_file, client);
+            
             break;
-
          case DONE:
             printf("\nSTATE = DONE\n");
-            break;
 
+            break;
          default:
             printf("In default server, shouldn't have gotten here\n");
             state = DONE;
+
             break;
       }
    }
@@ -142,13 +142,14 @@ STATE filename(Connection *client, uint8_t *buf, int32_t recv_len,
       exit(-1);
    }
 
-   if (((*data_file) = open(fname, O_RDWR)) < 0) {
-      printf("Error opening file\n");
+   if (((*data_file) = open(fname, O_WRONLY | O_TRUNC | O_CREAT, 0600)) < 0) {
+      printf("Error opening file: %s. Sending FNAME_BAD packet\n", fname);
 
       send_buf(response, 0, client, FNAME_BAD, 0, buf);
       return DONE;
-   } else {
-      printf("Succesfully opened file\n");
+   } 
+   else {
+      printf("Succesfully opened file: %s. Sending FNAME_OK Packet\n", fname);
 
       send_buf(response, 0, client, FNAME_OK, 0, buf);
       return RECV_DATA;
@@ -162,8 +163,10 @@ STATE recv_data(int32_t output_file, Connection *client) {
    uint8_t flag = 0;
    int32_t data_len = 0;
    uint8_t data_buf[MAX_LEN];
-   uint8_t packet[MAX_LEN];
-   static int32_t expected_seq_num = START_SEQ_NUM;
+
+   uint8_t sendBuffer[MAX_LEN];
+   int32_t sendLength = 0;
+   uint8_t sendPacket[MAX_LEN];
 
    if (select_call(client->sk_num, 10, 0, NOT_NULL) == 0) {
       printf("Timeout after 10 s, client done\n");
@@ -173,20 +176,35 @@ STATE recv_data(int32_t output_file, Connection *client) {
    data_len = recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
 
    if (data_len == CRC_ERROR) {
+      /* Send SREJ */ 
+      *((int32_t *) sendBuffer) = seq_num;
+      sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
+            server.sequence++, sendPacket);
+
       return RECV_DATA;
    }
 
-   send_buf(packet, 1, client, ACK, 0, packet);
-
    if (flag == END_OF_FILE) {
-      printf("file done\n");
+      printf("Received EOF packet\n");
+
+      close(output_file);
+
       return DONE;
    }
 
-   if (seq_num == expected_seq_num) {
-      expected_seq_num++;
-      write(output_file, &data_buf, data_len);
-   }
+   data_buf[data_len] = '\0';
+
+   printf("Recieved Data. Length: %d. Flag: %u. Sequence: %d. Data:'%s'\n", 
+         data_len, flag, seq_num, data_buf); 
+   
+   printf("Sending RR: %d\n", seq_num + 1);
+
+   /* Send RR */ 
+   *((int32_t *) sendBuffer) = seq_num + 1;
+   sendLength = send_buf(sendBuffer, sizeof(int32_t), client, RR, 
+         server.sequence++, sendPacket);
+
+   write(output_file, &data_buf, data_len);
 
    return RECV_DATA;
 }

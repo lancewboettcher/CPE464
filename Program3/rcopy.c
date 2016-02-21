@@ -43,6 +43,9 @@ void initRCopy(int argc, char *argv[]) {
 
    /* Init sequence number */
    rcopy.sequence = 1;
+
+   rcopy.bufferSize = atoi(argv[3]);
+   rcopy.windowSize = atoi(argv[4]);
 }
 
 void sendFile(int argc, char *argv[]) {
@@ -54,6 +57,7 @@ void sendFile(int argc, char *argv[]) {
 
       switch (state) {
          case FILENAME: 
+            printf("\nSTATE = FILENAME\n");
 
             /* Setup new socket */
             if (udp_client_setup(argv[6], atoi(argv[7])) < 0) {
@@ -61,7 +65,7 @@ void sendFile(int argc, char *argv[]) {
                exit(-1);
             }
 
-            state = filename(argv[1], atoi(argv[3]));
+            state = filename(argv[1], argv[2], atoi(argv[3]));
 
             if (state == FILENAME)
                close(server.sk_num);
@@ -73,12 +77,21 @@ void sendFile(int argc, char *argv[]) {
             }
 
             break;
-         case FILE_OK: 
+         case SEND_DATA: 
+            //printf("\nSTATE = SEND_DATA\n");
 
+            state = send_data();
 
             break;
-         case RECV: 
+         case PROCESS_ACKS: 
+            //printf("\nSTATE = PROCESS_ACKS\n");
 
+            state = processAcks();
+            break;
+         case WINDOW_CLOSED: 
+            printf("\nSTATE = WINDOW_CLOSED\n");
+
+            state = windowClosed();
 
             break;
          default: 
@@ -89,19 +102,24 @@ void sendFile(int argc, char *argv[]) {
    }
 }
 
-STATE filename(char *fname, int32_t buf_size) {
+STATE filename(char *localFilename, char *remoteFilename, int32_t buf_size) {
 
    uint8_t packet[MAX_LEN];
    uint8_t buf[MAX_LEN];
    uint8_t flag = 0;
    int32_t seq_num = 0;
-   int32_t fname_len = strlen(fname) + 1;
+   int32_t fname_len = strlen(remoteFilename) + 1;
    int32_t recv_check = 0;
 
-   memcpy(buf, &buf_size, 4);
-   memcpy(&buf[4], fname, fname_len);
+   /* Open the local file for reading */ 
+   if ((rcopy.localFile = open(localFilename, O_RDONLY)) < 0) {
+      printf("Error opening local file \n");
+      return DONE;
+   }
 
-   printf("Port: %hu socket: %d\n", ntohs(server.remote.sin_port), server.sk_num);
+   /* Send Filename to server */ 
+   memcpy(buf, &buf_size, 4);
+   memcpy(&buf[4], remoteFilename, fname_len);
 
    send_buf(buf, fname_len + 4, &server, FNAME, 0, packet);
 
@@ -114,48 +132,94 @@ STATE filename(char *fname, int32_t buf_size) {
          return FILENAME;
       }
       if (flag == FNAME_BAD) {
-         printf("File %s not found\n", fname);
+         printf("Bad remote fiename: %s\n", remoteFilename);
          return DONE;
       }
 
-      return FILE_OK;
+      return SEND_DATA;
    }
 
    return FILENAME;
 }
-/*
-int udp_send_setup(char *host_name, int port) {
-   int socket_num;
-   struct sockaddr_in remote;       // socket address for remote side
-   struct hostent *hp = NULL;              // address of remote host
 
-   if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-      perror("socket call");
-      exit(-1);
+STATE send_data() {
+
+   uint8_t buffer[MAX_LEN];
+   uint8_t packet[MAX_LEN];
+   int32_t lengthRead = 0;
+   int32_t packetLength = 0;
+
+   lengthRead = read(rcopy.localFile, buffer, rcopy.bufferSize);
+
+   if (lengthRead == -1) {
+      /* Error reading */ 
+
+      perror("send_data read error");
+      return DONE;
+   }
+   else if (lengthRead == 0) {
+      /* No more to read, Send EOF packet*/
+
+      printf("Sending EOF Packet\n");
+
+      packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
+            rcopy.sequence++, packet);
+
+      return DONE;
+   }
+   else {
+      /* Send data */ 
+      buffer[lengthRead] = '\0';
+      printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
+            lengthRead, rcopy.sequence, buffer);
+      
+      packetLength = send_buf(buffer, lengthRead, &server, DATA, 
+            rcopy.sequence++, packet);
    }
 
-   //designate the addressing family
-   remote.sin_family= AF_INET;
-
-   // get the address of the remote host and store
-   if ((hp = gethostbyname(host_name)) == NULL) {
-      printf("Error getting hostname: %s\n", host_name);
-      exit(-1);
-   }
-
-   memcpy((char*)&remote.sin_addr, (char*)hp->h_addr, hp->h_length);
-
-   // get the port used on the remote side and store
-   remote.sin_port = htons(port);
-
-   return socket_num;
+   return PROCESS_ACKS;
 }
-*/
+
+STATE processAcks() {
+   uint8_t packet[MAX_LEN];
+   uint8_t flag = 0;
+   int32_t seq_num = 0;
+   int32_t recv_check = 0;
+   int32_t rrVal;
+
+   while (select_call(server.sk_num, 0, 0, NOT_NULL)) { 
+      recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+
+      if (recv_check == CRC_ERROR) {
+         printf("*** CRC_ERROR in process acks ***\n");
+      }
+
+      switch (flag) {
+         case RR:
+            rrVal = *((int32_t *) packet);
+            printf("Received RR. Val: %d\n", rrVal);
+
+            break;
+         case SREJ: 
+
+
+            break;
+         default: 
+
+            break;
+      }
+   }
+
+   return SEND_DATA;
+}
+
+STATE windowClosed() {
+
+
+   return DONE;
+}
 
 int udp_client_setup(char *hostname, uint16_t port_num) {
-   /* returns a pointer to a sockaddr_in that it created or NULL if host not found.
-    *     * also passes back the socket number in sk */
-
    struct hostent *hp = NULL; // address of remote host
 
    server.sk_num = 0;
@@ -166,8 +230,6 @@ int udp_client_setup(char *hostname, uint16_t port_num) {
       exit(-1);
    }
 
-   printf("Socket num: %d\n", server.sk_num);
-
    server.remote.sin_family = AF_INET;
 
    hp = gethostbyname(hostname);
@@ -176,8 +238,6 @@ int udp_client_setup(char *hostname, uint16_t port_num) {
       printf("Host not found: %s\n", hostname);
       return -1;
    }
-
-   printf("Client setup. addr: %s, length: %d\n", hp->h_name, hp->h_length);
 
    memcpy(&(server.remote.sin_addr), hp->h_addr, hp->h_length);
 
@@ -189,7 +249,7 @@ int udp_client_setup(char *hostname, uint16_t port_num) {
 void validateParams(int argc, char *argv[]) {
 
    if (argc != 8) {
-      printf("Usage: %s local-file remote-file buffer-size error-percent"
+      printf("Usage: %s local-file remote-file buffer-size error-percent "
             "window-size remote-machine remote-port\n", argv[0]);
       exit(-1);
    }
