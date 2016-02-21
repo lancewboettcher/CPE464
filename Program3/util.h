@@ -2,7 +2,7 @@
 #define START_SEQ_NUM 1
 
 enum FLAG {
-   CRC_ERROR = -1
+   FNAME, DATA, FNAME_OK, FNAME_BAD, ACK, END_OF_FILE, CRC_ERROR = -1
 };
 
 enum SELECT {

@@ -26,6 +26,8 @@
 int32_t send_buf(uint8_t *buf, uint32_t len, Connection *connection,
             uint8_t flag, uint32_t seq_num, uint8_t *packet) {
 
+   printf("send_buf: socket: %d\n", connection->sk_num);
+
    int32_t send_len = 0;
    uint16_t checksum = 0;
 

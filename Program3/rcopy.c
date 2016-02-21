@@ -20,9 +20,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#include "util.h"
 #include "rcopy.h"
 #include "cpe464.h"
-#include "util.h"
 
 struct rcopy rcopy;
 Connection server;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON);
+   sendtoErr_init(atof(argv[4]), DROP_OFF, FLIP_OFF, DEBUG_OFF, RSEED_OFF);
 
    /* Init sequence number */
    rcopy.sequence = 1;
@@ -56,7 +56,7 @@ void sendFile(int argc, char *argv[]) {
          case FILENAME: 
 
             /* Setup new socket */
-            if ((server.sk_num = udp_send_setup(argv[6], atoi(argv[7]))) < 0) {
+            if (udp_client_setup(argv[6], atoi(argv[7])) < 0) {
                printf("Host not found\n");
                exit(-1);
             }
@@ -89,7 +89,7 @@ void sendFile(int argc, char *argv[]) {
    }
 }
 
-STATE filename(char *fname, int32_t buff_size) {
+STATE filename(char *fname, int32_t buf_size) {
 
    uint8_t packet[MAX_LEN];
    uint8_t buf[MAX_LEN];
@@ -100,6 +100,8 @@ STATE filename(char *fname, int32_t buff_size) {
 
    memcpy(buf, &buf_size, 4);
    memcpy(&buf[4], fname, fname_len);
+
+   printf("Port: %hu socket: %d\n", ntohs(server.remote.sin_port), server.sk_num);
 
    send_buf(buf, fname_len + 4, &server, FNAME, 0, packet);
 
@@ -121,12 +123,12 @@ STATE filename(char *fname, int32_t buff_size) {
 
    return FILENAME;
 }
-
+/*
 int udp_send_setup(char *host_name, int port) {
    int socket_num;
    struct sockaddr_in remote;       // socket address for remote side
-   struct hostent *hp;              // address of remote host
-   
+   struct hostent *hp = NULL;              // address of remote host
+
    if ((socket_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
       perror("socket call");
       exit(-1);
@@ -147,6 +149,41 @@ int udp_send_setup(char *host_name, int port) {
    remote.sin_port = htons(port);
 
    return socket_num;
+}
+*/
+
+int udp_client_setup(char *hostname, uint16_t port_num) {
+   /* returns a pointer to a sockaddr_in that it created or NULL if host not found.
+    *     * also passes back the socket number in sk */
+
+   struct hostent *hp = NULL; // address of remote host
+
+   server.sk_num = 0;
+   server.len = sizeof(struct sockaddr_in);
+
+   if ((server.sk_num = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      perror("udp_client_setup, socket");
+      exit(-1);
+   }
+
+   printf("Socket num: %d\n", server.sk_num);
+
+   server.remote.sin_family = AF_INET;
+
+   hp = gethostbyname(hostname);
+
+   if (hp == NULL) {
+      printf("Host not found: %s\n", hostname);
+      return -1;
+   }
+
+   printf("Client setup. addr: %s, length: %d\n", hp->h_name, hp->h_length);
+
+   memcpy(&(server.remote.sin_addr), hp->h_addr, hp->h_length);
+
+   server.remote.sin_port = htons(port_num);
+
+   return 0;
 }
 
 void validateParams(int argc, char *argv[]) {
