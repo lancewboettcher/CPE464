@@ -26,6 +26,7 @@
 
 struct rcopy rcopy;
 Connection server;
+Window window;
 
 int main(int argc, char *argv[]) {
    validateParams(argc, argv);
@@ -42,10 +43,16 @@ void initRCopy(int argc, char *argv[]) {
    sendtoErr_init(atof(argv[4]), DROP_OFF, FLIP_OFF, DEBUG_OFF, RSEED_OFF);
 
    /* Init sequence number */
-   rcopy.sequence = 1;
+   rcopy.sequence = START_SEQ_NUM;
 
    rcopy.bufferSize = atoi(argv[3]);
-   rcopy.windowSize = atoi(argv[4]);
+   rcopy.windowSize = atoi(argv[5]);
+
+   /* Setup Window */ 
+   window.bufferHead = NULL;
+   window.bottom = START_SEQ_NUM;
+   window.lower = START_SEQ_NUM;
+   window.upper = START_SEQ_NUM + rcopy.windowSize;
 }
 
 void sendFile(int argc, char *argv[]) {
@@ -77,28 +84,22 @@ void sendFile(int argc, char *argv[]) {
             }
 
             break;
-         case SEND_DATA: 
-            //printf("\nSTATE = SEND_DATA\n");
+         case WINDOW_OPEN:
+            printf("\nSTATE = WINDOW_OPEN\n");
 
-            state = send_data();
+            state = window_open();
 
-            break;
-         case PROCESS_ACKS: 
-            //printf("\nSTATE = PROCESS_ACKS\n");
-
-            state = processAcks();
             break;
          case WINDOW_CLOSED: 
             printf("\nSTATE = WINDOW_CLOSED\n");
 
-            state = windowClosed();
+            state = window_closed();
 
             break;
          default: 
             printf("Error - in default state\n");
             break;
       }
-
    }
 }
 
@@ -136,51 +137,74 @@ STATE filename(char *localFilename, char *remoteFilename, int32_t buf_size) {
          return DONE;
       }
 
-      return SEND_DATA;
+      return WINDOW_OPEN;
    }
 
    return FILENAME;
 }
 
-STATE send_data() {
+int sentEOF = 0;
+
+STATE window_open() {
 
    uint8_t buffer[MAX_LEN];
    uint8_t packet[MAX_LEN];
    int32_t lengthRead = 0;
    int32_t packetLength = 0;
 
-   lengthRead = read(rcopy.localFile, buffer, rcopy.bufferSize);
+   printWindow(window);
+   
+   while (window.lower < window.upper) { 
+      lengthRead = read(rcopy.localFile, buffer, rcopy.bufferSize);
 
-   if (lengthRead == -1) {
-      /* Error reading */ 
+      if (lengthRead == -1) {
+         /* Error reading */ 
 
-      perror("send_data read error");
-      return DONE;
+         perror("send_data read error");
+         return DONE;
+      }
+      else if (lengthRead == 0) {
+         /* No more to read, Send EOF packet*/
+
+         if (!sentEOF) { 
+            printf("Sending EOF Packet\n");
+
+            packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
+                  rcopy.sequence++, packet);
+
+            sentEOF = 1;
+         }
+
+         processAcks();
+      }
+      else {
+         /* Add the new data to window */ 
+         addWindowNode(&window.bufferHead, buffer, lengthRead, window.lower++);
+         printf("Added new window node \n");
+         printWindow(window);
+
+         /* Send data */ 
+         buffer[lengthRead] = '\0';
+         printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
+               lengthRead, rcopy.sequence, buffer);
+         
+         packetLength = send_buf(buffer, lengthRead, &server, DATA, 
+               rcopy.sequence++, packet);
+
+         processAcks();
+      }
    }
-   else if (lengthRead == 0) {
-      /* No more to read, Send EOF packet*/
 
-      printf("Sending EOF Packet\n");
-
-      packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
-            rcopy.sequence++, packet);
-
-      return DONE;
-   }
-   else {
-      /* Send data */ 
-      buffer[lengthRead] = '\0';
-      printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
-            lengthRead, rcopy.sequence, buffer);
-      
-      packetLength = send_buf(buffer, lengthRead, &server, DATA, 
-            rcopy.sequence++, packet);
-   }
-
-   return PROCESS_ACKS;
+   return WINDOW_CLOSED;
 }
 
-STATE processAcks() {
+STATE window_closed() {
+
+
+   return DONE;
+}
+
+void processAcks() {
    uint8_t packet[MAX_LEN];
    uint8_t flag = 0;
    int32_t seq_num = 0;
@@ -199,24 +223,24 @@ STATE processAcks() {
             rrVal = *((int32_t *) packet);
             printf("Received RR. Val: %d\n", rrVal);
 
+            /* Update the window */ 
+            removeWindowNodes(&window->bufferHead, rrVal);
+            window.bottom = rrVal;
+            window.upper = rrVal + rcopy.windowSize;
+
+            printWindow(window);
+
             break;
          case SREJ: 
 
 
             break;
-         default: 
+         default:
+
 
             break;
       }
    }
-
-   return SEND_DATA;
-}
-
-STATE windowClosed() {
-
-
-   return DONE;
 }
 
 int udp_client_setup(char *hostname, uint16_t port_num) {

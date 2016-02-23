@@ -107,3 +107,58 @@ int32_t select_call(int32_t socket_num, int32_t seconds, int32_t microseconds,
    else
       return 0;
 }
+
+void addWindowNode(WindowNode **head, uint8_t *data, int32_t length, int32_t index) {
+   WindowNode *newNode = malloc(sizeof(WindowNode));
+   memcpy(newNode->data, data, length);
+   newNode->index = index;
+   newNode->length = length;
+
+   if (*head == NULL) {
+      newNode->next = NULL;
+      *head = newNode;
+   }
+   else {
+      WindowNode *iterator = *head;
+
+      while (iterator->next != NULL) {
+         iterator = iterator->next;
+      }
+      iterator->next = newNode;
+   }
+}
+   
+void removeWindowNodes(WindowNode **head, int32_t rrVal) {
+   WindowNode *temp;
+   while ((*head)->index != rrVal - 1) {
+      temp = *head;
+
+      *head = (*head)->next;
+
+      free(temp);
+   }
+}
+
+WindowNode *getWindowNode(WindowNode **head, int32_t index) {
+   WindowNode *iterator = *head;
+
+   while (iterator != NULL && iterator->index != index) {
+      iterator = iterator->next;
+   }
+
+   return iterator;
+}
+
+void printWindow(Window window) {
+   printf("Window:\n");
+   printf("Bottom: %d. Lower: %d. Upper: %d\n", window.bottom, window.lower, window.upper);
+
+   WindowNode *iterator = window.bufferHead;
+   
+   while (iterator != NULL) {
+      iterator->data[iterator->length] = '\0';
+      printf("%d : %s\n", iterator->index, iterator->data);
+
+      iterator = iterator->next;
+   }
+}
