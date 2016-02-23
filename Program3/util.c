@@ -113,9 +113,9 @@ void addWindowNode(WindowNode **head, uint8_t *data, int32_t length, int32_t ind
    memcpy(newNode->data, data, length);
    newNode->index = index;
    newNode->length = length;
+   newNode->next = NULL;
 
    if (*head == NULL) {
-      newNode->next = NULL;
       *head = newNode;
    }
    else {
@@ -150,15 +150,23 @@ WindowNode *getWindowNode(WindowNode **head, int32_t index) {
 }
 
 void printWindow(Window window) {
-   printf("Window:\n");
+   printf("Printing Window...\n");
    printf("Bottom: %d. Lower: %d. Upper: %d\n", window.bottom, window.lower, window.upper);
 
    WindowNode *iterator = window.bufferHead;
+
+   uint8_t printBuf[10];
    
    while (iterator != NULL) {
       iterator->data[iterator->length] = '\0';
-      printf("%d : %s\n", iterator->index, iterator->data);
+
+      memcpy(printBuf, iterator->data, 5);
+      printBuf[5] = '\0';
+
+      printf("%d : %s\n", iterator->index, printBuf);
 
       iterator = iterator->next;
    }
+
+   printf("\n");
 }

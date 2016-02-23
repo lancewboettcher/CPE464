@@ -96,6 +96,12 @@ void sendFile(int argc, char *argv[]) {
             state = window_closed();
 
             break;
+         case SEND_EOF: 
+            printf("\nSTATE = SEND_EOF\n");
+            
+            state = send_eof();
+
+            break;
          default: 
             printf("Error - in default state\n");
             break;
@@ -143,7 +149,8 @@ STATE filename(char *localFilename, char *remoteFilename, int32_t buf_size) {
    return FILENAME;
 }
 
-int sentEOF = 0;
+int receivedFinalRR = 0;
+int finalPacketNumber = -1;
 
 STATE window_open() {
 
@@ -164,18 +171,15 @@ STATE window_open() {
          return DONE;
       }
       else if (lengthRead == 0) {
-         /* No more to read, Send EOF packet*/
+         /* No more to read */
 
-         if (!sentEOF) { 
-            printf("Sending EOF Packet\n");
-
-            packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
-                  rcopy.sequence++, packet);
-
-            sentEOF = 1;
+         if (finalPacketNumber == -1) {
+            printf("Set final packet number to %d \n", rcopy.sequence - 1);
+            finalPacketNumber = rcopy.sequence - 1;
          }
-
-         processAcks();
+         if (receivedFinalRR) { 
+            return SEND_EOF;
+         }
       }
       else {
          /* Add the new data to window */ 
@@ -185,61 +189,131 @@ STATE window_open() {
 
          /* Send data */ 
          buffer[lengthRead] = '\0';
-         printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
-               lengthRead, rcopy.sequence, buffer);
+         //printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
+         //      lengthRead, rcopy.sequence, buffer);
          
          packetLength = send_buf(buffer, lengthRead, &server, DATA, 
                rcopy.sequence++, packet);
 
-         processAcks();
       }
+
+      checkAndProcessAcks();
    }
 
    return WINDOW_CLOSED;
 }
 
 STATE window_closed() {
+   /* 1 second blocking select */ 
+   int attempts = 0;
+   int32_t packetLength = 0;
+   uint8_t packet[MAX_LEN];
 
+   while (attempts++ < 10) {
+      if (select_call(server.sk_num, 1, 0, NOT_NULL)) {
+         /* Received something. Process it*/ 
+         
+         processAck();
+
+         return WINDOW_OPEN;
+      }
+      else {
+         /* Timeout - resend the lowest packet */ 
+
+         printf("Attempt %d. Resending packet %d\n", attempts, window.bottom);
+
+         packetLength = send_buf((uint8_t *) window.bufferHead, window.bufferHead->length, &server, DATA, 
+               window.bufferHead->index, packet);
+      }
+   }
+
+   printf("\nServer Hasn't respond after 10 attempts :( DONE\n");
 
    return DONE;
 }
 
-void processAcks() {
+STATE send_eof() {
+   uint8_t buffer[MAX_LEN];
+   uint8_t packet[MAX_LEN];
+   int32_t packetLength = 0;
+   uint8_t flag = 0;
+   int32_t seq_num = 0;
+   int32_t recv_check = 0;
+   int attempts = 0;
+   
+   packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
+                  rcopy.sequence++, packet);
+
+   while (attempts++ < 10) {
+      if (select_call(server.sk_num, 1, 0, NOT_NULL)) {
+         /* Received something. Process it*/ 
+         
+         recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+
+         if (recv_check == CRC_ERROR) {
+            printf("*** CRC_ERROR in send eof***\n");
+         }
+         if (flag == ACK_EOF) {
+            return DONE;
+         }
+      }
+      else {
+         /* Timeout - resend the lowest packet */ 
+
+         printf("Attempt %d. Resending EOF Packet\n", attempts);
+         packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
+                  rcopy.sequence++, packet);
+      }
+   }
+
+   return DONE;
+}
+
+void checkAndProcessAcks() {
+
+   while (select_call(server.sk_num, 0, 0, NOT_NULL)) { 
+      processAck();
+   }
+}
+
+void processAck() {
    uint8_t packet[MAX_LEN];
    uint8_t flag = 0;
    int32_t seq_num = 0;
    int32_t recv_check = 0;
    int32_t rrVal;
+   
+   recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
 
-   while (select_call(server.sk_num, 0, 0, NOT_NULL)) { 
-      recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+   if (recv_check == CRC_ERROR) {
+      printf("*** CRC_ERROR in process acks ***\n");
+   }
 
-      if (recv_check == CRC_ERROR) {
-         printf("*** CRC_ERROR in process acks ***\n");
-      }
+   switch (flag) {
+      case RR:
+         rrVal = *((int32_t *) packet);
+         printf("Received RR. Val: %d\n", rrVal);
 
-      switch (flag) {
-         case RR:
-            rrVal = *((int32_t *) packet);
-            printf("Received RR. Val: %d\n", rrVal);
+         /* Update the window */ 
+         removeWindowNodes(&window.bufferHead, rrVal);
+         window.bottom = rrVal;
+         window.upper = rrVal + rcopy.windowSize;
 
-            /* Update the window */ 
-            removeWindowNodes(&window->bufferHead, rrVal);
-            window.bottom = rrVal;
-            window.upper = rrVal + rcopy.windowSize;
+         printWindow(window);
 
-            printWindow(window);
+         if (finalPacketNumber != -1 && rrVal == finalPacketNumber) {
+            receivedFinalRR = 1;
+         }
 
-            break;
-         case SREJ: 
-
-
-            break;
-         default:
+         break;
+      case SREJ: 
 
 
-            break;
-      }
+         break;
+      default:
+
+
+         break;
    }
 }
 
