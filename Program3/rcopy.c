@@ -254,6 +254,8 @@ STATE send_eof() {
             printf("*** CRC_ERROR in send eof***\n");
          }
          if (flag == ACK_EOF) {
+            printf("Received ACK_EOF. DONE!\n");
+
             return DONE;
          }
       }
@@ -281,7 +283,7 @@ void processAck() {
    uint8_t flag = 0;
    int32_t seq_num = 0;
    int32_t recv_check = 0;
-   int32_t rrVal;
+   int32_t rrVal, srejVal;
    
    recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
 
@@ -301,13 +303,15 @@ void processAck() {
 
          printWindow(window);
 
-         if (finalPacketNumber != -1 && rrVal == finalPacketNumber) {
+         if (finalPacketNumber != -1 && rrVal == finalPacketNumber + 1) {
+            printf("Recieved final RR. Setting var\n");
             receivedFinalRR = 1;
          }
 
          break;
       case SREJ: 
-
+         srejVal = *((int32_t *) packet);
+         printf("Received SREJ. Val: %d\n", srejVal);
 
          break;
       default:

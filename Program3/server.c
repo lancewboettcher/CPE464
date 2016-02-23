@@ -189,6 +189,10 @@ STATE recv_data(int32_t output_file, Connection *client) {
 
       close(output_file);
 
+      /* TODO: Maybe send this more than once? */ 
+      sendLength = send_buf(sendBuffer, 1, client, ACK_EOF, 
+         server.sequence++, sendPacket);
+
       return DONE;
    }
 
