@@ -225,7 +225,8 @@ STATE window_closed() {
    while (attempts++ < 10) {
       if (select_call(server.sk_num, 1, 0, NOT_NULL)) {
          /* Received something. Process it*/ 
-         
+         printf("Received Something. Processing it\n");
+
          processAck();
 
          return WINDOW_OPEN;
@@ -235,10 +236,10 @@ STATE window_closed() {
 
          WindowNode *lowestPacket = window.bufferHead;
 
-         printf("Attempt %d. Resending packet %d\n", attempts, lowestPacket->index);
-
          packetLength = send_buf(lowestPacket->data, lowestPacket->length, &server, DATA, 
                lowestPacket->index, packet);
+
+         printf("Attempt %d. Resent packet %d. Length: %d\n", attempts, lowestPacket->index, packetLength);
       }
    }
 

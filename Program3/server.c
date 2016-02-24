@@ -23,6 +23,7 @@
 #include "util.h"
 #include "server.h"
 #include "cpe464.h"
+#include <sys/wait.h>
 
 struct server server;
 Window window;
@@ -61,7 +62,7 @@ void initServer(int argc, char *argv[]) {
 
 void runServer() {
    pid_t pid = 0;
-   //int status = 0;
+   int status = 0;
    uint8_t buf[MAX_LEN];
    Connection client;
    uint8_t flag = 0;
@@ -75,20 +76,19 @@ void runServer() {
          recv_len = recv_buf(buf, 1000, server.serverSocket, &client, &flag, &seq_num);
 
          if (recv_len != CRC_ERROR) {
-            /*   if((pid = fork()) < 0) {
+            if ((pid = fork()) < 0) {
                  perror("fork");
                  exit(-1);
-                 }
-                 */
+            }
             if (pid == 0) {
                processClient(buf, recv_len, &client);
                exit(0);
             }
          }
-         /*
-            while (waitpid(-1, &status, WNOHANG) > 0) {
+         
+         while (waitpid(-1, &status, WNOHANG) > 0) {
             printf("processed wait\n");
-            }*/
+         }
       }
 
    }
