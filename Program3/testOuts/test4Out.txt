@@ -1,0 +1,476 @@
+Usage: ./rcopy local-file remote-file buffer-size error-percent window-size remote-machine remote-port
+Usage: ./rcopy local-file remote-file buffer-size error-percent window-size remote-machine remote-port
+Usage: ./rcopy local-file remote-file buffer-size error-percent window-size remote-machine remote-port
+Usage: ./rcopy local-file remote-file buffer-size error-percent window-size remote-machine remote-port
+======== SeqNo Report ========
+  Msgs (Total)       :     7
+  Msgs (Unique SeqNo):     7
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+
+STATE = SEND_EOF
+Received ACK_EOF. Sending FINAL_OK. DONE!
+======== SeqNo Report ========
+  Msgs (Total)       :     7
+  Msgs (Unique SeqNo):     7
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+
+STATE = SEND_EOF
+Received ACK_EOF. Sending FINAL_OK. DONE!
+======== SeqNo Report ========
+  Msgs (Total)       :     7
+  Msgs (Unique SeqNo):     7
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+
+STATE = SEND_EOF
+Received ACK_EOF. Sending FINAL_OK. DONE!
+======== SeqNo Report ========
+  Msgs (Total)       :     7
+  Msgs (Unique SeqNo):     7
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 5. Upper: 7
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+
+STATE = SEND_EOF
+Received ACK_EOF. Sending FINAL_OK. DONE!
