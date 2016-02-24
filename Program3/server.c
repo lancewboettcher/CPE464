@@ -121,6 +121,11 @@ void processClient(uint8_t *buf, int32_t recv_len, Connection *client) {
             state = recv_data(data_file, client);
             
             break;
+         case RECVD_EOF: 
+            printf("\nSTATE = RECVD_EOF\n");
+            state = recvd_eof(client);
+
+            break;
          case DONE:
             printf("\nSTATE = DONE\n");
 
@@ -196,23 +201,19 @@ STATE recv_data(int32_t output_file, Connection *client) {
    }
 
    if (flag == END_OF_FILE) {
-      printf("Received EOF packet\n");
+      printf("Received EOF packet. Closing output file\n");
 
       close(output_file);
 
-      /* TODO: Maybe send this more than once? */ 
-      sendLength = send_buf(sendBuffer, 1, client, ACK_EOF, 
-         server.sequence++, sendPacket);
-
-      return DONE;
+      return RECVD_EOF;
    }
 
    /* Valid data */
 
    data_buf[data_len] = '\0';
 
-   printf("Recieved Data. Length: %d. Flag: %u. Sequence: %d. Data:'%s'\n", 
-         data_len, flag, seq_num, data_buf); 
+   printf("Recieved Data. Length: %d. Flag: %u. Sequence: %d\n", 
+         data_len, flag, seq_num); 
    
    if (seq_num == window.bottom) {
       /* Expected Packet */
@@ -232,10 +233,27 @@ STATE recv_data(int32_t output_file, Connection *client) {
       sendLength = send_buf(sendBuffer, sizeof(int32_t), client, RR, 
             server.sequence++, sendPacket);
 
-      /* Write to file */ 
+      /* Write to file */
+      printf("Writing %d to file\n", seq_num);
       write(output_file, &data_buf, data_len);
 
-      /* Increment window */ 
+      int seqToWrite = seq_num + 1;
+      WindowNode *windowToWrite;
+      while (seqToWrite < rrVal) {      
+         /* Need to write the other valid data in buffer */ 
+
+         windowToWrite = getWindowNode(&window.bufferHead, seqToWrite);
+         
+         windowToWrite->data[windowToWrite->length] = '\0';
+         printf("Writing %d to file\n", seqToWrite);
+         //printf("Writing %d to file: %s\n", seqToWrite, windowToWrite->data);
+
+         write(output_file, &windowToWrite->data, windowToWrite->length);
+
+         seqToWrite++;
+      }
+
+      /* Update window */ 
       window.bottom = rrVal;
       removeWindowNodes(&window.bufferHead, window.bottom);
    }
@@ -248,14 +266,61 @@ STATE recv_data(int32_t output_file, Connection *client) {
 
       printWindow(window);
 
-      printf("Packet higher than expected. Sending SREJ %d\n", window.bottom);
- 
-      *((int32_t *) sendBuffer) = window.bottom;
-      sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
-            server.sequence++, sendPacket);
+      WindowNode *srejNode = getWindowNode(&window.bufferHead, window.bottom);
+      
+      if (srejNode->sentSREJ == 0) {
+         /* Make sure we only send the SREJ once */ 
+
+         printf("Packet higher than expected. Sending SREJ %d\n", window.bottom);
+    
+         *((int32_t *) sendBuffer) = window.bottom;
+         sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
+               server.sequence++, sendPacket);
+
+         srejNode->sentSREJ = 1;
+      }
    }
 
    return RECV_DATA;
+}
+
+STATE recvd_eof(Connection *client) {
+   uint8_t sendBuffer[MAX_LEN];
+   int32_t sendLength = 0;
+   uint8_t sendPacket[MAX_LEN];
+
+   uint8_t data_buf[MAX_LEN];
+   uint8_t flag = 0;
+   int32_t seq_num = 0;
+
+   int attempts = 0;
+
+   /* Send ACK_EOF */ 
+   sendLength = send_buf(sendBuffer, 1, client, ACK_EOF, 
+         server.sequence++, sendPacket);
+
+   while (attempts++ < 10) {
+      if (select_call(client->sk_num, 1, 0, NOT_NULL) == 1) {
+         /* Received Something. Process it */ 
+
+         recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
+
+         if (flag == FINAL_OK) {
+            printf("Received FINAL_OK from client. killling\n");
+
+            return DONE;
+         }
+      }
+      else {
+         /* Resending ACK_EOF packet */ 
+         printf("Resending ACK_EOF. Attempt %d\n", attempts);
+
+         sendLength = send_buf(sendBuffer, 1, client, ACK_EOF, 
+               server.sequence++, sendPacket);
+      }
+   }
+
+   return DONE;
 }
 
 int32_t udp_recv_setup(int portNumber) {

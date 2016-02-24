@@ -2,7 +2,7 @@
 #define START_SEQ_NUM 1
 
 enum FLAG {
-   FNAME, DATA, FNAME_OK, FNAME_BAD, RR, SREJ, END_OF_FILE, ACK_EOF, CRC_ERROR = -1
+   FNAME, DATA, FNAME_OK, FNAME_BAD, RR, SREJ, END_OF_FILE, ACK_EOF, FINAL_OK, CRC_ERROR = -1
 };
 
 enum SELECT {
@@ -23,6 +23,7 @@ struct windowNode {
    uint8_t data[MAX_LEN];
    int32_t length;
    int index;
+   int sentSREJ;
    WindowNode *next;
 };
 

@@ -113,6 +113,7 @@ void addWindowNode(WindowNode **head, uint8_t *data, int32_t length, int32_t ind
    memcpy(newNode->data, data, length);
    newNode->index = index;
    newNode->length = length;
+   newNode->sentSREJ = 0;
    newNode->next = NULL;
 
    if (*head == NULL) {
@@ -134,12 +135,14 @@ void addWindowNodeAtIndex(Window *window, uint8_t *data, int32_t length, int32_t
    memcpy(newNode->data, data, length);
    newNode->index = index;
    newNode->length = length;
+   newNode->sentSREJ = 0;
    newNode->next = NULL;
 
    if (window->bufferHead == NULL) {
       WindowNode *newHead = malloc(sizeof(WindowNode));
       newHead->index = window->bottom;
       newHead->length = -1;
+      newHead->sentSREJ = 0;
       newHead->next = NULL;
         
       window->bufferHead = newHead;
@@ -153,6 +156,7 @@ void addWindowNodeAtIndex(Window *window, uint8_t *data, int32_t length, int32_t
          placeHolder = malloc(sizeof(WindowNode));
          placeHolder->index = iterator->index + 1;
          placeHolder->length = -1;
+         placeHolder->sentSREJ = 0;
          placeHolder->next = NULL;    
 
          iterator->next = placeHolder;
@@ -181,9 +185,10 @@ void removeWindowNodes(WindowNode **head, int32_t rrVal) {
       return;
    }
 
-   while ((*head)->index < rrVal) {
+   while (*head != NULL && (*head)->index < rrVal) {    
+      printf("Removing node at index %d\n", (*head)->index);
+      
       temp = *head;
-printf("Removing node at index %d\n", (*head)->index);
       *head = (*head)->next;
 
       free(temp);
@@ -201,6 +206,8 @@ WindowNode *getWindowNode(WindowNode **head, int32_t index) {
 }
 
 int32_t getNewBottomIndex(Window window) {
+   printf("Getting new bottom index\n");
+   printWindow(window);
 
    WindowNode *iterator = window.bufferHead;
 
@@ -211,13 +218,21 @@ int32_t getNewBottomIndex(Window window) {
 
    if (iterator->index == window.bottom) {
       iterator = iterator->next;
+
+      if (iterator == NULL) 
+         return window.bottom + 1;
    }
 
    while (iterator->next != NULL && iterator->length != -1) {
       iterator = iterator->next;
    }
-
-   return iterator->index;
+   
+   if (iterator->length == -1) 
+      return iterator->index;
+   
+   //if (iterator->next == NULL) 
+   else
+      return iterator->index + 1;
 }
 
 void printWindow(Window window) {

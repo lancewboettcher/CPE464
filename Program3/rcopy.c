@@ -180,12 +180,21 @@ STATE window_open() {
          if (receivedFinalRR) { 
             return SEND_EOF;
          }
+         if (finalPacketNumber != -1 && window.lower > finalPacketNumber) {
+            /* Sent all packets */
+
+            return WINDOW_CLOSED;
+         }
       }
       else {
+         if (lengthRead < rcopy.bufferSize) {
+            /* Last packet */ 
+            finalPacketNumber = rcopy.sequence;
+         }
+
          /* Add the new data to window */ 
-         addWindowNode(&window.bufferHead, buffer, lengthRead, window.lower++);
-         printf("Added new window node \n");
-         printWindow(window);
+         addWindowNode(&window.bufferHead, buffer, lengthRead, rcopy.sequence);
+         printf("Added new window node %d\n", rcopy.sequence);
 
          /* Send data */ 
          buffer[lengthRead] = '\0';
@@ -193,8 +202,12 @@ STATE window_open() {
                lengthRead, rcopy.sequence);
          
          packetLength = send_buf(buffer, lengthRead, &server, DATA, 
-               rcopy.sequence++, packet);
+               rcopy.sequence, packet);
 
+         rcopy.sequence++;
+         window.lower = rcopy.sequence;
+
+         printWindow(window);
       }
 
       checkAndProcessAcks();
@@ -256,8 +269,11 @@ STATE send_eof() {
             printf("*** CRC_ERROR in send eof***\n");
          }
          if (flag == ACK_EOF) {
-            printf("Received ACK_EOF. DONE!\n");
-
+            printf("Received ACK_EOF. Sending FINAL_OK. DONE!\n");
+            
+            send_buf(buffer, 1, &server, FINAL_OK, 
+                  rcopy.sequence++, packet);
+            
             return DONE;
          }
       }
