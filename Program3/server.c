@@ -25,6 +25,7 @@
 #include "cpe464.h"
 
 struct server server;
+Window window;
 
 int main(int argc, char *argv[]) {
    initServer(argc, argv);
@@ -50,7 +51,12 @@ void initServer(int argc, char *argv[]) {
       server.serverSocket = udp_recv_setup(0);
 
    /* Init sequence number */ 
-   server.sequence = 1;
+   server.sequence = START_SEQ_NUM;
+
+   /* Init window */ 
+   window.bottom = START_SEQ_NUM;
+   window.lower = START_SEQ_NUM;
+   window.bufferHead = NULL;
 }
 
 void runServer() {
@@ -168,6 +174,8 @@ STATE recv_data(int32_t output_file, Connection *client) {
    int32_t sendLength = 0;
    uint8_t sendPacket[MAX_LEN];
 
+   int32_t rrVal;
+
    if (select_call(client->sk_num, 10, 0, NOT_NULL) == 0) {
       printf("Timeout after 10 s, client done\n");
       return DONE;
@@ -176,7 +184,10 @@ STATE recv_data(int32_t output_file, Connection *client) {
    data_len = recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
 
    if (data_len == CRC_ERROR) {
-      /* Send SREJ */ 
+      /* CRC Error - Send SREJ */
+
+      printf("CRC Error. Sending SREJ %d\n", seq_num);
+ 
       *((int32_t *) sendBuffer) = seq_num;
       sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
             server.sequence++, sendPacket);
@@ -196,19 +207,53 @@ STATE recv_data(int32_t output_file, Connection *client) {
       return DONE;
    }
 
+   /* Valid data */
+
    data_buf[data_len] = '\0';
 
    printf("Recieved Data. Length: %d. Flag: %u. Sequence: %d. Data:'%s'\n", 
          data_len, flag, seq_num, data_buf); 
    
-   printf("Sending RR: %d\n", seq_num + 1);
+   if (seq_num == window.bottom) {
+      /* Expected Packet */
+      
+      if (window.bufferHead == NULL) {
+         /* Nothing buffered */ 
+         rrVal = seq_num + 1;
+      }
+      else {
+         rrVal = getNewBottomIndex(window);
+      }
 
-   /* Send RR */ 
-   *((int32_t *) sendBuffer) = seq_num + 1;
-   sendLength = send_buf(sendBuffer, sizeof(int32_t), client, RR, 
-         server.sequence++, sendPacket);
+      printf("Received expected packet. Sending RR: %d\n", rrVal);
 
-   write(output_file, &data_buf, data_len);
+      /* Send RR */ 
+      *((int32_t *) sendBuffer) = rrVal;
+      sendLength = send_buf(sendBuffer, sizeof(int32_t), client, RR, 
+            server.sequence++, sendPacket);
+
+      /* Write to file */ 
+      write(output_file, &data_buf, data_len);
+
+      /* Increment window */ 
+      window.bottom = rrVal;
+      removeWindowNodes(&window.bufferHead, window.bottom);
+   }
+   else if (seq_num > window.bottom) {
+      /* Higher sequence number than expected - buffer */
+
+      printf("Packet Higher than expected. Buffering %d\n", seq_num);
+
+      addWindowNodeAtIndex(&window, data_buf, data_len, seq_num);
+
+      printWindow(window);
+
+      printf("Packet higher than expected. Sending SREJ %d\n", window.bottom);
+ 
+      *((int32_t *) sendBuffer) = window.bottom;
+      sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
+            server.sequence++, sendPacket);
+   }
 
    return RECV_DATA;
 }

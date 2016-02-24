@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_OFF, FLIP_OFF, DEBUG_OFF, RSEED_OFF);
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_OFF, DEBUG_OFF, RSEED_OFF);
 
    /* Init sequence number */
    rcopy.sequence = START_SEQ_NUM;
@@ -189,8 +189,8 @@ STATE window_open() {
 
          /* Send data */ 
          buffer[lengthRead] = '\0';
-         //printf("Sending data packet. Length: %d. Sequence: %d. Data: '%s'\n", 
-         //      lengthRead, rcopy.sequence, buffer);
+         printf("Sending data packet. Length: %d. Sequence: %d\n", 
+               lengthRead, rcopy.sequence);
          
          packetLength = send_buf(buffer, lengthRead, &server, DATA, 
                rcopy.sequence++, packet);
@@ -220,10 +220,12 @@ STATE window_closed() {
       else {
          /* Timeout - resend the lowest packet */ 
 
-         printf("Attempt %d. Resending packet %d\n", attempts, window.bottom);
+         WindowNode *lowestPacket = window.bufferHead;
 
-         packetLength = send_buf((uint8_t *) window.bufferHead, window.bufferHead->length, &server, DATA, 
-               window.bufferHead->index, packet);
+         printf("Attempt %d. Resending packet %d\n", attempts, lowestPacket->index);
+
+         packetLength = send_buf(lowestPacket->data, lowestPacket->length, &server, DATA, 
+               lowestPacket->index, packet);
       }
    }
 
@@ -313,9 +315,25 @@ void processAck() {
          srejVal = *((int32_t *) packet);
          printf("Received SREJ. Val: %d\n", srejVal);
 
+         /* Update the window */ 
+         removeWindowNodes(&window.bufferHead, srejVal);
+         window.bottom = srejVal;
+         window.upper = srejVal + rcopy.windowSize;
+
+         printWindow(window);
+
+         /* Send data */ 
+         WindowNode *resendNode = getWindowNode(&window.bufferHead, srejVal);
+
+         printf("Sending SREJ data packet. Length: %d. Sequence: %d\n", 
+               resendNode->length, resendNode->index);
+         
+         send_buf(resendNode->data, resendNode->length, &server, DATA, 
+               resendNode->index, packet);
+
          break;
       default:
-
+         printf("Defulat of process ack - shouldnt be here \n");
 
          break;
    }

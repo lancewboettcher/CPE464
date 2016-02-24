@@ -127,12 +127,63 @@ void addWindowNode(WindowNode **head, uint8_t *data, int32_t length, int32_t ind
       iterator->next = newNode;
    }
 }
+
+void addWindowNodeAtIndex(Window *window, uint8_t *data, int32_t length, int32_t index) {
+   WindowNode *placeHolder;
+   WindowNode *newNode = malloc(sizeof(WindowNode));
+   memcpy(newNode->data, data, length);
+   newNode->index = index;
+   newNode->length = length;
+   newNode->next = NULL;
+
+   if (window->bufferHead == NULL) {
+      WindowNode *newHead = malloc(sizeof(WindowNode));
+      newHead->index = window->bottom;
+      newHead->length = -1;
+      newHead->next = NULL;
+        
+      window->bufferHead = newHead;
+   }
+
+   WindowNode *iterator = window->bufferHead;
+
+   while (iterator->index != index - 1) {
+      if (iterator->next == NULL) {
+         /* Create a placeholder node */ 
+         placeHolder = malloc(sizeof(WindowNode));
+         placeHolder->index = iterator->index + 1;
+         placeHolder->length = -1;
+         placeHolder->next = NULL;    
+
+         iterator->next = placeHolder;
+      }
+
+      iterator = iterator->next;
+   }
+
+   if (iterator->next != NULL) {
+      WindowNode *tmp = iterator->next;
+   
+      iterator->next = newNode;
+      newNode->next = tmp;
+   }
+   else {
+      iterator->next = newNode;
+   }
+}
    
 void removeWindowNodes(WindowNode **head, int32_t rrVal) {
-   WindowNode *temp;
-   while ((*head)->index != rrVal - 1) {
-      temp = *head;
+   printf("Removing window nodes below %d\n", rrVal);
 
+   WindowNode *temp;
+
+   if (*head == NULL || (*head)->index >= rrVal) {
+      return;
+   }
+
+   while ((*head)->index < rrVal) {
+      temp = *head;
+printf("Removing node at index %d\n", (*head)->index);
       *head = (*head)->next;
 
       free(temp);
@@ -147,6 +198,26 @@ WindowNode *getWindowNode(WindowNode **head, int32_t index) {
    }
 
    return iterator;
+}
+
+int32_t getNewBottomIndex(Window window) {
+
+   WindowNode *iterator = window.bufferHead;
+
+   if (window.bufferHead == NULL) {
+      /* Nothing in the buffer */ 
+      return window.bottom;
+   }
+
+   if (iterator->index == window.bottom) {
+      iterator = iterator->next;
+   }
+
+   while (iterator->next != NULL && iterator->length != -1) {
+      iterator = iterator->next;
+   }
+
+   return iterator->index;
 }
 
 void printWindow(Window window) {

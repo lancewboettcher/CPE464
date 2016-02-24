@@ -43,6 +43,8 @@ int32_t recv_buf(uint8_t *buf, int32_t len, int32_t recv_sk_num,
 int32_t select_call(int32_t socket_num, int32_t seconds, int32_t microseconds, 
       int32_t set_null);
 void addWindowNode(WindowNode **head, uint8_t *data, int32_t length, int32_t index);
+void addWindowNodeAtIndex(Window *window, uint8_t *data, int32_t length, int32_t index);
 void removeWindowNodes(WindowNode **head, int32_t rrVal);
 WindowNode *getWindowNode(WindowNode **head, int32_t index);
+int32_t getNewBottomIndex(Window window);
 void printWindow(Window window);
