@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_OFF, DEBUG_OFF, RSEED_OFF);
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_OFF);
 
    /* Init sequence number */
    rcopy.sequence = START_SEQ_NUM;
@@ -269,7 +269,7 @@ STATE send_eof() {
          if (recv_check == CRC_ERROR) {
             printf("*** CRC_ERROR in send eof***\n");
          }
-         if (flag == ACK_EOF) {
+         else if (flag == ACK_EOF) {
             printf("Received ACK_EOF. Sending FINAL_OK. DONE!\n");
             
             send_buf(buffer, 1, &server, FINAL_OK, 
@@ -307,13 +307,20 @@ void processAck() {
    recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
 
    if (recv_check == CRC_ERROR) {
-      printf("*** CRC_ERROR in process acks ***\n");
+      printf("*** CRC_ERROR in process acks. Ignoring it ***\n");
+
+      return;
    }
 
    switch (flag) {
       case RR:
          rrVal = *((int32_t *) packet);
          printf("Received RR. Val: %d\n", rrVal);
+
+         if (rrVal <= window.bottom) {
+            printf("Received invalid RR %d\n", rrVal);
+            return;
+         }
 
          /* Update the window */ 
          removeWindowNodes(&window.bufferHead, rrVal);
@@ -331,6 +338,11 @@ void processAck() {
       case SREJ: 
          srejVal = *((int32_t *) packet);
          printf("Received SREJ. Val: %d\n", srejVal);
+
+         if (srejVal < window.bottom) {
+            printf("Received invalid SREJ %d\n", srejVal);
+            return;
+         }
 
          /* Update the window */ 
          removeWindowNodes(&window.bufferHead, srejVal);
