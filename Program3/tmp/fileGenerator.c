@@ -13,6 +13,8 @@ int main() {
    int i = 0;
    for ( i = 0; i < 1001; i++) {
       fprintf(fptr,"%d ",i);
+      if (i % 10 == 0) 
+         fprintf(fptr, "\n");
    }
    fclose(fptr);
    return 0;
