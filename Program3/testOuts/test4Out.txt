@@ -237,22 +237,8 @@ Bottom: 3. Lower: 8. Upper: 8
 6 : 6 637
 7 : 8 759
 
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
 Received SREJ. Val: 0
 Received invalid SREJ 0
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 3. Lower: 8. Upper: 8
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it

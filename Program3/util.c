@@ -215,8 +215,9 @@ int32_t getNewBottomIndex(Window window) {
       /* Nothing in the buffer */ 
       return window.bottom;
    }
-
-/*   if (iterator->length == -1) {
+/*
+   if (iterator->length == -1) {
+      printf("First length = -1. returning %d\n", window.bottom);
       return window.bottom;
    }
 */

@@ -291,10 +291,13 @@ STATE recv_data(int32_t output_file, Connection *client) {
 
       if (window.bufferHead == NULL) {
          /* Nothing buffered */ 
-         rrVal = seq_num + 1;
+         rrVal = window.bottom;
       }
       else {
-         rrVal = getNewBottomIndex(window);
+         if (window.bufferHead->length == -1) 
+            rrVal = window.bottom;
+         else 
+            rrVal = getNewBottomIndex(window);
       }
 
       printf("Received Lower sequence number than expected. Sending RR %d\n", rrVal);

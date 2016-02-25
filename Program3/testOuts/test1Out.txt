@@ -57,12 +57,21 @@ Bottom: 1. Lower: 6. Upper: 11
 4 : 2 393
 5 : 4 515
 
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 6. Upper: 12
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
 Added new window node 6
 Sending data packet. Length: 500. Sequence: 6
 Printing Window...
-Bottom: 1. Lower: 7. Upper: 11
-1 : 0 
-1 
+Bottom: 2. Lower: 7. Upper: 12
 2 :  149 
 3 :  
 271
@@ -73,9 +82,7 @@ Bottom: 1. Lower: 7. Upper: 11
 Added new window node 7
 Sending data packet. Length: 500. Sequence: 7
 Printing Window...
-Bottom: 1. Lower: 8. Upper: 11
-1 : 0 
-1 
+Bottom: 2. Lower: 8. Upper: 12
 2 :  149 
 3 :  
 271
@@ -88,26 +95,6 @@ Read < Buffer. Set final packet number to 8
 Added new window node 8
 Sending data packet. Length: 496. Sequence: 8
 Printing Window...
-Bottom: 1. Lower: 9. Upper: 11
-1 : 0 
-1 
-2 :  149 
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
-Received RR. Val: 2
-Removing window nodes below 2
-Removing node at index 1
-Printing Window...
 Bottom: 2. Lower: 9. Upper: 12
 2 :  149 
 3 :  
@@ -119,39 +106,9 @@ Bottom: 2. Lower: 9. Upper: 12
 8 : 0 
 88
 
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 2. Lower: 9. Upper: 12
-2 :  149 
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
 Received RR. Val: 3
 Removing window nodes below 3
 Removing node at index 2
-Printing Window...
-Bottom: 3. Lower: 9. Upper: 13
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
 Printing Window...
 Bottom: 3. Lower: 9. Upper: 13
 3 :  
@@ -338,21 +295,18 @@ Bottom: 1. Lower: 5. Upper: 6
 271
 4 : 2 393
 
-Added new window node 5
-Sending data packet. Length: 500. Sequence: 5
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
 Printing Window...
-Bottom: 1. Lower: 6. Upper: 6
-1 : 0 
-1 
+Bottom: 2. Lower: 5. Upper: 7
 2 :  149 
 3 :  
 271
 4 : 2 393
-5 : 4 515
 
-Received RR. Val: 2
-Removing window nodes below 2
-Removing node at index 1
+Added new window node 5
+Sending data packet. Length: 500. Sequence: 5
 Printing Window...
 Bottom: 2. Lower: 6. Upper: 7
 2 :  149 
@@ -429,22 +383,9 @@ Bottom: 4. Lower: 9. Upper: 9
 8 : 0 
 88
 
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
 Received RR. Val: 5
 Removing window nodes below 5
 Removing node at index 4
-Printing Window...
-Bottom: 5. Lower: 9. Upper: 10
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
 Printing Window...
 Bottom: 5. Lower: 9. Upper: 10
 5 : 4 515
@@ -603,12 +544,22 @@ Bottom: 1. Lower: 7. Upper: 11
 5 : 4 515
 6 : 6 637
 
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 12
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
 Added new window node 7
 Sending data packet. Length: 500. Sequence: 7
 Printing Window...
-Bottom: 1. Lower: 8. Upper: 11
-1 : 0 
-1 
+Bottom: 2. Lower: 8. Upper: 12
 2 :  149 
 3 :  
 271
@@ -620,40 +571,6 @@ Bottom: 1. Lower: 8. Upper: 11
 Read < Buffer. Set final packet number to 8 
 Added new window node 8
 Sending data packet. Length: 496. Sequence: 8
-Printing Window...
-Bottom: 1. Lower: 9. Upper: 11
-1 : 0 
-1 
-2 :  149 
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
-Received RR. Val: 2
-Removing window nodes below 2
-Removing node at index 1
-Printing Window...
-Bottom: 2. Lower: 9. Upper: 12
-2 :  149 
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
 Printing Window...
 Bottom: 2. Lower: 9. Upper: 12
 2 :  149 

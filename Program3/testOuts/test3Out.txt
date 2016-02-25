@@ -236,22 +236,9 @@ Bottom: 1. Lower: 6. Upper: 6
 4 : 2 393
 5 : 4 515
 
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
 Received RR. Val: 2
 Removing window nodes below 2
 Removing node at index 1
-Printing Window...
-Bottom: 2. Lower: 6. Upper: 7
-2 :  149 
-3 :  
-271
-4 : 2 393
-5 : 4 515
-
-
-STATE = WINDOW_OPEN
 Printing Window...
 Bottom: 2. Lower: 6. Upper: 7
 2 :  149 
@@ -668,4 +655,4 @@ Attempt 5. Resending EOF Packet
 Attempt 7. Resending EOF Packet
 *** CRC_ERROR in send eof***
 Attempt 9. Resending EOF Packet
-Attempt 10. Resending EOF Packet
+Received ACK_EOF. Sending FINAL_OK. DONE!
