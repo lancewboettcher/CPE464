@@ -1,5 +1,5 @@
 ======== SeqNo Report ========
-  Msgs (Total)       :    11
+  Msgs (Total)       :    21
   Msgs (Unique SeqNo):    11
 ==============================
 
@@ -18,6 +18,18 @@ Bottom: 1. Lower: 2. Upper: 2
 
 
 STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 2
+1 : 0 
+1 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 508
 Received Something. Processing it
 Received RR. Val: 2
 Removing window nodes below 2
@@ -60,6 +72,45 @@ Bottom: 3. Lower: 4. Upper: 4
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  
+271
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  
+271
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  
+271
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Received Something. Processing it
 Received RR. Val: 4
 Removing window nodes below 4
 Removing node at index 3
@@ -99,6 +150,18 @@ Bottom: 5. Lower: 6. Upper: 6
 
 
 STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 6. Upper: 6
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 5. Length: 508
+Attempt 2. Resent packet 5. Length: 508
 Received Something. Processing it
 Received RR. Val: 6
 Removing window nodes below 6
@@ -162,6 +225,18 @@ Bottom: 8. Lower: 9. Upper: 9
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 9
+8 : 0 
+88
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 8. Length: 504
+Received Something. Processing it
 Received RR. Val: 9
 Removing window nodes below 9
 Removing node at index 8
@@ -178,8 +253,8 @@ Bottom: 9. Lower: 9. Upper: 10
 STATE = SEND_EOF
 Received ACK_EOF. Sending FINAL_OK. DONE!
 ======== SeqNo Report ========
-  Msgs (Total)       :    11
-  Msgs (Unique SeqNo):    11
+  Msgs (Total)       :    26
+  Msgs (Unique SeqNo):    12
 ==============================
 
 STATE = FILENAME
@@ -236,9 +311,39 @@ Bottom: 1. Lower: 6. Upper: 6
 4 : 2 393
 5 : 4 515
 
-Received RR. Val: 2
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 2
 Removing window nodes below 2
 Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 6. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+Sending SREJ data packet. Length: 500. Sequence: 2
+
+STATE = WINDOW_OPEN
 Printing Window...
 Bottom: 2. Lower: 6. Upper: 7
 2 :  149 
@@ -258,16 +363,119 @@ Bottom: 2. Lower: 7. Upper: 7
 5 : 4 515
 6 : 6 637
 
+Received SREJ. Val: 0
+Received invalid SREJ 0
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
-Received RR. Val: 3
-Removing window nodes below 3
-Removing node at index 2
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
 Printing Window...
-Bottom: 3. Lower: 7. Upper: 8
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
 3 :  
 271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Attempt 2. Resent packet 2. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Attempt 2. Resent packet 2. Length: 508
+Attempt 3. Resent packet 2. Length: 508
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Attempt 2. Resent packet 2. Length: 508
+Received Something. Processing it
+Received RR. Val: 4
+Removing window nodes below 4
+Removing node at index 2
+Removing node at index 3
+Printing Window...
+Bottom: 4. Lower: 7. Upper: 9
 4 : 2 393
 5 : 4 515
 6 : 6 637
@@ -275,27 +483,13 @@ Bottom: 3. Lower: 7. Upper: 8
 
 STATE = WINDOW_OPEN
 Printing Window...
-Bottom: 3. Lower: 7. Upper: 8
-3 :  
-271
+Bottom: 4. Lower: 7. Upper: 9
 4 : 2 393
 5 : 4 515
 6 : 6 637
 
 Added new window node 7
 Sending data packet. Length: 500. Sequence: 7
-Printing Window...
-Bottom: 3. Lower: 8. Upper: 8
-3 :  
-271
-4 : 2 393
-5 : 4 515
-6 : 6 637
-7 : 8 759
-
-Received RR. Val: 4
-Removing window nodes below 4
-Removing node at index 3
 Printing Window...
 Bottom: 4. Lower: 8. Upper: 9
 4 : 2 393
@@ -317,12 +511,15 @@ Bottom: 4. Lower: 9. Upper: 9
 
 
 STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 4. Length: 508
 Received Something. Processing it
-Received RR. Val: 5
-Removing window nodes below 5
-Removing node at index 4
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
 Printing Window...
-Bottom: 5. Lower: 9. Upper: 10
+Bottom: 4. Lower: 9. Upper: 9
+4 : 2 393
 5 : 4 515
 6 : 6 637
 7 : 8 759
@@ -330,80 +527,16 @@ Bottom: 5. Lower: 9. Upper: 10
 88
 
 
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 5. Lower: 9. Upper: 10
-5 : 4 515
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
 STATE = WINDOW_CLOSED
-Received Something. Processing it
-Received RR. Val: 6
-Removing window nodes below 6
-Removing node at index 5
-Printing Window...
-Bottom: 6. Lower: 9. Upper: 11
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 6. Lower: 9. Upper: 11
-6 : 6 637
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
-Received RR. Val: 7
-Removing window nodes below 7
-Removing node at index 6
-Printing Window...
-Bottom: 7. Lower: 9. Upper: 12
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 7. Lower: 9. Upper: 12
-7 : 8 759
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Received Something. Processing it
-Received RR. Val: 8
-Removing window nodes below 8
-Removing node at index 7
-Printing Window...
-Bottom: 8. Lower: 9. Upper: 13
-8 : 0 
-88
-
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 8. Lower: 9. Upper: 13
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 4. Length: 508
+Attempt 2. Resent packet 4. Length: 508
 Received Something. Processing it
 Received RR. Val: 9
 Removing window nodes below 9
+Removing node at index 4
+Removing node at index 5
+Removing node at index 6
+Removing node at index 7
 Removing node at index 8
 Printing Window...
 Bottom: 9. Lower: 9. Upper: 14
@@ -416,10 +549,178 @@ Bottom: 9. Lower: 9. Upper: 14
 
 
 STATE = SEND_EOF
+*** CRC_ERROR in send eof***
+Attempt 2. Resending EOF Packet
 Received ACK_EOF. Sending FINAL_OK. DONE!
 ======== SeqNo Report ========
-  Msgs (Total)       :    21
-  Msgs (Unique SeqNo):    17
+  Msgs (Total)       :    20
+  Msgs (Unique SeqNo):    11
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Read < Buffer. Set final packet number to 4 
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 1
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 3
+Removing window nodes below 3
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+Sending SREJ data packet. Length: 1000. Sequence: 3
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 1008
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 1008
+Attempt 2. Resent packet 3. Length: 1008
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 1008
+Attempt 2. Resent packet 3. Length: 1008
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 5. Upper: 8
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 1008
+Attempt 2. Resent packet 3. Length: 1008
+Attempt 3. Resent packet 3. Length: 1008
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 10
+
+
+STATE = SEND_EOF
+Attempt 2. Resending EOF Packet
+*** CRC_ERROR in send eof***
+Attempt 4. Resending EOF Packet
+Attempt 5. Resending EOF Packet
+Attempt 6. Resending EOF Packet
+Received ACK_EOF. Sending FINAL_OK. DONE!
+======== SeqNo Report ========
+  Msgs (Total)       :    32
+  Msgs (Unique SeqNo):    14
 ==============================
 
 STATE = FILENAME
@@ -437,6 +738,18 @@ Bottom: 1. Lower: 2. Upper: 2
 
 
 STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 2
+1 : 0 
+1 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 508
 Received Something. Processing it
 Received RR. Val: 2
 Removing window nodes below 2
@@ -457,6 +770,9 @@ Bottom: 2. Lower: 3. Upper: 3
 
 
 STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Attempt 2. Resent packet 2. Length: 508
+Attempt 3. Resent packet 2. Length: 508
 Received Something. Processing it
 Received RR. Val: 3
 Removing window nodes below 3
@@ -479,8 +795,7 @@ Bottom: 3. Lower: 4. Upper: 4
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
-Received SREJ. Val: 0
-Received invalid SREJ 0
+*** CRC_ERROR in process acks. Ignoring it ***
 
 STATE = WINDOW_OPEN
 Printing Window...
@@ -491,6 +806,34 @@ Bottom: 3. Lower: 4. Upper: 4
 
 STATE = WINDOW_CLOSED
 Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  
+271
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  
+271
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 3. Length: 508
+Attempt 2. Resent packet 3. Length: 508
+Attempt 3. Resent packet 3. Length: 508
 Received Something. Processing it
 Received RR. Val: 4
 Removing window nodes below 4
@@ -531,6 +874,22 @@ Bottom: 5. Lower: 6. Upper: 6
 
 
 STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 5. Length: 508
+Attempt 2. Resent packet 5. Length: 508
+Attempt 3. Resent packet 5. Length: 508
+Attempt 4. Resent packet 5. Length: 508
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 6. Upper: 6
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 5. Length: 508
+Attempt 2. Resent packet 5. Length: 508
 Received Something. Processing it
 Received RR. Val: 6
 Removing window nodes below 6
@@ -594,34 +953,7 @@ Bottom: 8. Lower: 9. Upper: 9
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
-Received SREJ. Val: 0
-Received invalid SREJ 0
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 8. Lower: 9. Upper: 9
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Attempt 1. Resent packet 8. Length: 504
-Received Something. Processing it
-Received SREJ. Val: 0
-Received invalid SREJ 0
-
-STATE = WINDOW_OPEN
-Printing Window...
-Bottom: 8. Lower: 9. Upper: 9
-8 : 0 
-88
-
-
-STATE = WINDOW_CLOSED
-Attempt 1. Resent packet 8. Length: 504
-Received Something. Processing it
-Received SREJ. Val: 0
-Received invalid SREJ 0
+*** CRC_ERROR in process acks. Ignoring it ***
 
 STATE = WINDOW_OPEN
 Printing Window...
@@ -647,12 +979,316 @@ Bottom: 9. Lower: 9. Upper: 10
 
 
 STATE = SEND_EOF
-Attempt 1. Resending EOF Packet
 Attempt 2. Resending EOF Packet
+Attempt 3. Resending EOF Packet
 Attempt 4. Resending EOF Packet
-Attempt 5. Resending EOF Packet
-*** CRC_ERROR in send eof***
-Attempt 7. Resending EOF Packet
-*** CRC_ERROR in send eof***
-Attempt 9. Resending EOF Packet
+Received ACK_EOF. Sending FINAL_OK. DONE!
+======== SeqNo Report ========
+  Msgs (Total)       :    26
+  Msgs (Unique SeqNo):    12
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 1001
+
+Added new window node 1
+Sending data packet. Length: 450. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 1001
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 450. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+
+Added new window node 3
+Sending data packet. Length: 450. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+
+Added new window node 4
+Sending data packet. Length: 450. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+
+Added new window node 5
+Sending data packet. Length: 450. Sequence: 5
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+
+Added new window node 6
+Sending data packet. Length: 450. Sequence: 6
+Printing Window...
+Bottom: 1. Lower: 7. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+
+Added new window node 7
+Sending data packet. Length: 450. Sequence: 7
+Printing Window...
+Bottom: 1. Lower: 8. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+
+Added new window node 8
+Sending data packet. Length: 450. Sequence: 8
+Printing Window...
+Bottom: 1. Lower: 9. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+
+Read < Buffer. Set final packet number to 9 
+Added new window node 9
+Sending data packet. Length: 396. Sequence: 9
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 458
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 458
+Attempt 2. Resent packet 1. Length: 458
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 458
+Attempt 2. Resent packet 1. Length: 458
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 10. Upper: 1001
+1 : 0 
+1 
+2 : 6 137
+3 : 46 24
+4 : 356 3
+5 :  466 
+6 : 5 576
+7 : 85 68
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 458
+Attempt 2. Resent packet 1. Length: 458
+Attempt 3. Resent packet 1. Length: 458
+Received Something. Processing it
+Received RR. Val: 8
+Removing window nodes below 8
+Removing node at index 1
+Removing node at index 2
+Removing node at index 3
+Removing node at index 4
+Removing node at index 5
+Removing node at index 6
+Removing node at index 7
+Printing Window...
+Bottom: 8. Lower: 10. Upper: 1008
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 10. Upper: 1008
+8 : 795 7
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 8. Length: 458
+Attempt 2. Resent packet 8. Length: 458
+Attempt 3. Resent packet 8. Length: 458
+Received Something. Processing it
+Received RR. Val: 9
+Removing window nodes below 9
+Removing node at index 8
+Printing Window...
+Bottom: 9. Lower: 10. Upper: 1009
+9 :  905 
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 9. Lower: 10. Upper: 1009
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 9. Length: 404
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 9. Lower: 10. Upper: 1009
+9 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 9. Length: 404
+Attempt 2. Resent packet 9. Length: 404
+Received Something. Processing it
+Received RR. Val: 10
+Removing window nodes below 10
+Removing node at index 9
+Printing Window...
+Bottom: 10. Lower: 10. Upper: 1010
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 10. Lower: 10. Upper: 1010
+
+
+STATE = SEND_EOF
 Received ACK_EOF. Sending FINAL_OK. DONE!

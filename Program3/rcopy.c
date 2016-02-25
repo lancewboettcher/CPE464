@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_OFF);
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_ON);
 
    /* Init sequence number */
    rcopy.sequence = START_SEQ_NUM;
@@ -132,7 +132,7 @@ STATE filename(char *localFilename, char *remoteFilename, int32_t buf_size) {
 
    if (select_call(server.sk_num, 1, 0, NOT_NULL) == 1) {
 
-      recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+      recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
 
       if (recv_check == CRC_ERROR) {
          printf("CRC_ERROR in filename\n");
@@ -266,7 +266,7 @@ STATE send_eof() {
       if (select_call(server.sk_num, 1, 0, NOT_NULL)) {
          /* Received something. Process it*/ 
          
-         recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+         recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
 
          if (recv_check == CRC_ERROR) {
             printf("*** CRC_ERROR in send eof***\n");
@@ -306,7 +306,7 @@ void processAck() {
    int32_t recv_check = 0;
    int32_t rrVal, srejVal;
    
-   recv_check = recv_buf(packet, 1000, server.sk_num, &server, &flag, &seq_num);
+   recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
 
    if (recv_check == CRC_ERROR) {
       printf("*** CRC_ERROR in process acks. Ignoring it ***\n");

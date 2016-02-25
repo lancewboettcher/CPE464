@@ -44,7 +44,7 @@ void initServer(int argc, char *argv[]) {
          exit(-1);
       }
 
-      sendtoErr_init(atof(argv[1]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_OFF); 
+      sendtoErr_init(atof(argv[1]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_ON); 
    }
    else {
       perror("Usage: server <Error Percent> <Port Number (Optional)>");
@@ -79,7 +79,7 @@ void runServer() {
       if (select_call(server.serverSocket, 1, 0, NOT_NULL) == 1) {
          printf("New Client\n");
 
-         recv_len = recv_buf(buf, 1000, server.serverSocket, &client, &flag, &seq_num);
+         recv_len = recv_buf(buf, MAX_LEN, server.serverSocket, &client, &flag, &seq_num);
 
          if (recv_len != CRC_ERROR) {
             if ((pid = fork()) < 0) {
@@ -192,7 +192,7 @@ STATE recv_data(int32_t output_file, Connection *client) {
       return DONE;
    }
 
-   data_len = recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
+   data_len = recv_buf(data_buf, MAX_LEN, client->sk_num, client, &flag, &seq_num);
 
    if (data_len == CRC_ERROR) {
       /* CRC Error - Send SREJ */
@@ -334,7 +334,7 @@ STATE recvd_eof(Connection *client) {
       if (select_call(client->sk_num, 1, 0, NOT_NULL) == 1) {
          /* Received Something. Process it */ 
 
-         data_len = recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
+         data_len = recv_buf(data_buf, MAX_LEN, client->sk_num, client, &flag, &seq_num);
 
          if (data_len == CRC_ERROR) {
             printf("In RECVD_EOF - CRC Error\n");
