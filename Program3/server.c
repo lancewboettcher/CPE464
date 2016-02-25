@@ -239,7 +239,8 @@ STATE recv_data(int32_t output_file, Connection *client) {
             server.sequence++, sendPacket);
 
       /* Write to file */
-      printf("Writing %d to file\n", seq_num);
+      data_buf[data_len] = '\0';
+      printf("Writing %d to file. Data: %s\n", seq_num, data_buf);
       write(output_file, &data_buf, data_len);
 
       int seqToWrite = seq_num + 1;
@@ -250,8 +251,8 @@ STATE recv_data(int32_t output_file, Connection *client) {
          windowToWrite = getWindowNode(&window.bufferHead, seqToWrite);
          
          windowToWrite->data[windowToWrite->length] = '\0';
-         printf("Writing %d to file\n", seqToWrite);
-         //printf("Writing %d to file: %s\n", seqToWrite, windowToWrite->data);
+         //printf("Writing %d to file\n", seqToWrite);
+         printf("In loop writing %d to file. Data: %s\n", seqToWrite, windowToWrite->data);
 
          write(output_file, &windowToWrite->data, windowToWrite->length);
 
@@ -286,8 +287,8 @@ STATE recv_data(int32_t output_file, Connection *client) {
       }
    }
    else {
-      /* Lower sequence number than expected. Resend RR? TODO */ 
-      
+      /* Lower sequence number than expected. Resend RR? TODO */
+
       if (window.bufferHead == NULL) {
          /* Nothing buffered */ 
          rrVal = seq_num + 1;
@@ -316,6 +317,7 @@ STATE recvd_eof(Connection *client) {
    uint8_t sendPacket[MAX_LEN];
 
    uint8_t data_buf[MAX_LEN];
+   int32_t data_len;
    uint8_t flag = 0;
    int32_t seq_num = 0;
 
@@ -329,9 +331,12 @@ STATE recvd_eof(Connection *client) {
       if (select_call(client->sk_num, 1, 0, NOT_NULL) == 1) {
          /* Received Something. Process it */ 
 
-         recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
+         data_len = recv_buf(data_buf, 1400, client->sk_num, client, &flag, &seq_num);
 
-         if (flag == FINAL_OK) {
+         if (data_len == CRC_ERROR) {
+            printf("In RECVD_EOF - CRC Error\n");
+         }
+         else if (flag == FINAL_OK) {
             printf("Received FINAL_OK from client. killling\n");
 
             return DONE;

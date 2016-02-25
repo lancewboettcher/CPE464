@@ -216,6 +216,10 @@ int32_t getNewBottomIndex(Window window) {
       return window.bottom;
    }
 
+/*   if (iterator->length == -1) {
+      return window.bottom;
+   }
+*/
    if (iterator->index == window.bottom) {
       iterator = iterator->next;
 

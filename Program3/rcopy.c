@@ -188,7 +188,9 @@ STATE window_open() {
       }
       else {
          if (lengthRead < rcopy.bufferSize) {
-            /* Last packet */ 
+            /* Last packet */
+
+            printf("Read < Buffer. Set final packet number to %d \n", rcopy.sequence);
             finalPacketNumber = rcopy.sequence;
          }
 
