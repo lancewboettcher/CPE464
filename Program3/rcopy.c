@@ -6,7 +6,7 @@
  *     
  * Lance Boettcher
  * ******************************************************************************/
-//
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON);
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_ON);
 
    /* Init sequence number */
    rcopy.sequence = START_SEQ_NUM;
@@ -64,8 +64,6 @@ void sendFile(int argc, char *argv[]) {
 
       switch (state) {
          case FILENAME: 
-            printf("\nSTATE = FILENAME\n");
-
             /* Setup new socket */
             if (udp_client_setup(argv[6], atoi(argv[7])) < 0) {
                printf("Host not found\n");
@@ -85,25 +83,18 @@ void sendFile(int argc, char *argv[]) {
 
             break;
          case WINDOW_OPEN:
-            printf("\nSTATE = WINDOW_OPEN\n");
-
             state = window_open();
 
             break;
          case WINDOW_CLOSED: 
-            printf("\nSTATE = WINDOW_CLOSED\n");
-
             state = window_closed();
 
             break;
          case SEND_EOF: 
-            printf("\nSTATE = SEND_EOF\n");
-            
             state = send_eof();
 
             break;
          default: 
-            printf("Error - in default state\n");
             break;
       }
    }
@@ -132,10 +123,10 @@ STATE filename(char *localFilename, char *remoteFilename, int32_t buf_size) {
 
    if (select_call(server.sk_num, 1, 0, NOT_NULL) == 1) {
 
-      recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
+      recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, 
+            &flag, &seq_num);
 
       if (recv_check == CRC_ERROR) {
-         printf("CRC_ERROR in filename\n");
          return FILENAME;
       }
       if (flag == FNAME_BAD) {
@@ -159,8 +150,6 @@ STATE window_open() {
    int32_t lengthRead = 0;
    int32_t packetLength = 0;
 
-   printWindow(window);
-   
    while (window.lower < window.upper) { 
       lengthRead = read(rcopy.localFile, buffer, rcopy.bufferSize);
 
@@ -174,7 +163,6 @@ STATE window_open() {
          /* No more to read */
 
          if (finalPacketNumber == -1) {
-            printf("Set final packet number to %d \n", rcopy.sequence - 1);
             finalPacketNumber = rcopy.sequence - 1;
          }
          if (receivedFinalRR) { 
@@ -190,18 +178,14 @@ STATE window_open() {
          if (lengthRead < rcopy.bufferSize) {
             /* Last packet */
 
-            printf("Read < Buffer. Set final packet number to %d \n", rcopy.sequence);
             finalPacketNumber = rcopy.sequence;
          }
 
          /* Add the new data to window */ 
          addWindowNode(&window.bufferHead, buffer, lengthRead, rcopy.sequence);
-         printf("Added new window node %d\n", rcopy.sequence);
 
          /* Send data */ 
          buffer[lengthRead] = '\0';
-         printf("Sending data packet. Length: %d. Sequence: %d\n", 
-               lengthRead, rcopy.sequence);
          
          packetLength = send_buf(buffer, lengthRead, &server, DATA, 
                rcopy.sequence, packet);
@@ -209,7 +193,6 @@ STATE window_open() {
          rcopy.sequence++;
          window.lower = rcopy.sequence;
 
-         printWindow(window);
       }
 
       checkAndProcessAcks();
@@ -227,7 +210,6 @@ STATE window_closed() {
    while (attempts++ < 10) {
       if (select_call(server.sk_num, 1, 0, NOT_NULL)) {
          /* Received something. Process it*/ 
-         printf("Received Something. Processing it\n");
 
          processAck();
 
@@ -238,14 +220,12 @@ STATE window_closed() {
 
          WindowNode *lowestPacket = window.bufferHead;
 
-         packetLength = send_buf(lowestPacket->data, lowestPacket->length, &server, DATA, 
-               lowestPacket->index, packet);
-
-         printf("Attempt %d. Resent packet %d. Length: %d\n", attempts, lowestPacket->index, packetLength);
+         packetLength = send_buf(lowestPacket->data, lowestPacket->length, 
+               &server, DATA, lowestPacket->index, packet);
       }
    }
 
-   printf("\nServer Hasn't respond after 10 attempts :( DONE\n");
+   printf("No response from server. Terminating\n");
 
    return DONE;
 }
@@ -269,11 +249,8 @@ STATE send_eof() {
          recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
 
          if (recv_check == CRC_ERROR) {
-            printf("*** CRC_ERROR in send eof***\n");
          }
          else if (flag == ACK_EOF) {
-            printf("Received ACK_EOF. Sending FINAL_OK. DONE!\n");
-            
             send_buf(buffer, 1, &server, FINAL_OK, 
                   rcopy.sequence++, packet);
             
@@ -283,7 +260,6 @@ STATE send_eof() {
       else {
          /* Timeout - resend the lowest packet */ 
 
-         printf("Attempt %d. Resending EOF Packet\n", attempts);
          packetLength = send_buf(buffer, 1, &server, END_OF_FILE, 
                   rcopy.sequence++, packet);
       }
@@ -309,7 +285,6 @@ void processAck() {
    recv_check = recv_buf(packet, MAX_LEN, server.sk_num, &server, &flag, &seq_num);
 
    if (recv_check == CRC_ERROR) {
-      printf("*** CRC_ERROR in process acks. Ignoring it ***\n");
 
       return;
    }
@@ -317,10 +292,8 @@ void processAck() {
    switch (flag) {
       case RR:
          rrVal = *((int32_t *) packet);
-         printf("Received RR. Val: %d\n", rrVal);
 
          if (rrVal <= window.bottom) {
-            printf("Received invalid RR %d\n", rrVal);
             return;
          }
 
@@ -329,20 +302,15 @@ void processAck() {
          window.bottom = rrVal;
          window.upper = rrVal + rcopy.windowSize;
 
-         printWindow(window);
-
          if (finalPacketNumber != -1 && rrVal == finalPacketNumber + 1) {
-            printf("Recieved final RR. Setting var\n");
             receivedFinalRR = 1;
          }
 
          break;
       case SREJ: 
          srejVal = *((int32_t *) packet);
-         printf("Received SREJ. Val: %d\n", srejVal);
 
          if (srejVal < window.bottom) {
-            printf("Received invalid SREJ %d\n", srejVal);
             return;
          }
 
@@ -351,21 +319,14 @@ void processAck() {
          window.bottom = srejVal;
          window.upper = srejVal + rcopy.windowSize;
 
-         printWindow(window);
-
          /* Send data */ 
          WindowNode *resendNode = getWindowNode(&window.bufferHead, srejVal);
 
-         printf("Sending SREJ data packet. Length: %d. Sequence: %d\n", 
-               resendNode->length, resendNode->index);
-         
          send_buf(resendNode->data, resendNode->length, &server, DATA, 
                resendNode->index, packet);
 
          break;
       default:
-         printf("Defulat of process ack - shouldnt be here \n");
-
          break;
    }
 }

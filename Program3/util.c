@@ -177,8 +177,6 @@ void addWindowNodeAtIndex(Window *window, uint8_t *data, int32_t length, int32_t
 }
    
 void removeWindowNodes(WindowNode **head, int32_t rrVal) {
-   printf("Removing window nodes below %d\n", rrVal);
-
    WindowNode *temp;
 
    if (*head == NULL || (*head)->index >= rrVal) {
@@ -186,8 +184,6 @@ void removeWindowNodes(WindowNode **head, int32_t rrVal) {
    }
 
    while (*head != NULL && (*head)->index < rrVal) {    
-      printf("Removing node at index %d\n", (*head)->index);
-      
       temp = *head;
       *head = (*head)->next;
 
@@ -206,21 +202,13 @@ WindowNode *getWindowNode(WindowNode **head, int32_t index) {
 }
 
 int32_t getNewBottomIndex(Window window) {
-   printf("Getting new bottom index\n");
-   printWindow(window);
-
    WindowNode *iterator = window.bufferHead;
 
    if (window.bufferHead == NULL) {
       /* Nothing in the buffer */ 
       return window.bottom;
    }
-/*
-   if (iterator->length == -1) {
-      printf("First length = -1. returning %d\n", window.bottom);
-      return window.bottom;
-   }
-*/
+
    if (iterator->index == window.bottom) {
       iterator = iterator->next;
 
