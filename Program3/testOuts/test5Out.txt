@@ -2,13 +2,13 @@ Send Err-INIT ErrRate: 0.00 Drop: Y Flip: Y Rand: Y Debug: Y
 SEND MSG#   1 SEQ#   0 LEN   37 FLAGS 6
 RECV          SEQ#   0 LEN    8 FLAGS 7
 SEND MSG#   2 SEQ#   1 LEN 1008 FLAGS 1
-(Pid: 3590) Select Timed Out
+(Pid: 867) Select Timed Out
 SEND MSG#   3 SEQ#   2 LEN 1008 FLAGS 1
-(Pid: 3590) Select Timed Out
+(Pid: 867) Select Timed Out
 SEND MSG#   4 SEQ#   3 LEN 1008 FLAGS 1
-(Pid: 3590) Select Timed Out
+(Pid: 867) Select Timed Out
 SEND MSG#   5 SEQ#   4 LEN 1004 FLAGS 1
-(Pid: 3590) Select Timed Out
+(Pid: 867) Select Timed Out
 RECV          SEQ#   1 LEN   12 FLAGS 3
 RECV          SEQ#   2 LEN   12 FLAGS 3
 RECV          SEQ#   3 LEN   12 FLAGS 3
@@ -108,12 +108,17 @@ Bottom: 3. Lower: 5. Upper: 103
 
 STATE = WINDOW_CLOSED
 Received Something. Processing it
-*** CRC_ERROR in process acks. Ignoring it ***
+Received RR. Val: 4
+Removing window nodes below 4
+Removing node at index 3
+Printing Window...
+Bottom: 4. Lower: 5. Upper: 104
+4 : 8 759
+
 
 STATE = WINDOW_OPEN
 Printing Window...
-Bottom: 3. Lower: 5. Upper: 103
-3 : 4 515
+Bottom: 4. Lower: 5. Upper: 104
 4 : 8 759
 
 
@@ -121,7 +126,6 @@ STATE = WINDOW_CLOSED
 Received Something. Processing it
 Received RR. Val: 5
 Removing window nodes below 5
-Removing node at index 3
 Removing node at index 4
 Printing Window...
 Bottom: 5. Lower: 5. Upper: 105
@@ -137,38 +141,928 @@ STATE = SEND_EOF
 Received ACK_EOF. Sending FINAL_OK. DONE!
 Send Err-INIT ErrRate: 0.60 Drop: Y Flip: Y Rand: Y Debug: Y
 SEND MSG#   1 SEQ#   0 LEN   37 FLAGS 6
+(Pid: 925) Select Timed Out
+SEND MSG#   2 SEQ#   0 LEN   37 FLAGS 6
+(Pid: 925) Select Timed Out
+SEND MSG#   3 SEQ#   0 LEN   37 FLAGS 6 - FLIPPED BITS
+
+(Pid: 925) Select Timed Out
+SEND MSG#   4 SEQ#   0 LEN   37 FLAGS 6 - FLIPPED BITS
+
+(Pid: 925) Select Timed Out
+SEND MSG#   5 SEQ#   0 LEN   37 FLAGS 6
 RECV          SEQ#   0 LEN    8 FLAGS 7
-SEND MSG#   2 SEQ#   1 LEN  508 FLAGS 1 - DROPPED
+SEND MSG#   6 SEQ#   1 LEN  508 FLAGS 1 - FLIPPED BITS
 
-(Pid: 4016) Select Timed Out
-SEND MSG#   3 SEQ#   2 LEN  508 FLAGS 1 - DROPPED
+(Pid: 925) Select Timed Out
+SEND MSG#   7 SEQ#   2 LEN  508 FLAGS 1 - FLIPPED BITS
 
-(Pid: 4016) Select Timed Out
-SEND MSG#   4 SEQ#   3 LEN  508 FLAGS 1 - FLIPPED BITS
-
-(Pid: 4016) Select Timed Out
-SEND MSG#   5 SEQ#   4 LEN  508 FLAGS 1 - FLIPPED BITS
-
-(Pid: 4016) Select Timed Out
-SEND MSG#   6 SEQ#   5 LEN  508 FLAGS 1 - FLIPPED BITS
-
-(Pid: 4016) Select Timed Out
+(Pid: 925) Select Timed Out
+SEND MSG#   8 SEQ#   3 LEN  508 FLAGS 1
+(Pid: 925) Select Timed Out
+SEND MSG#   9 SEQ#   4 LEN  508 FLAGS 1
+(Pid: 925) Select Timed Out
+SEND MSG#  10 SEQ#   5 LEN  508 FLAGS 1
+(Pid: 925) Select Timed Out
 RECV          SEQ#   1 LEN   12 FLAGS 4
 RECV          SEQ#   2 LEN   12 FLAGS 4
 RECV          SEQ#   3 LEN   12 FLAGS 4
-(Pid: 4016) Select Timed Out
-SEND MSG#   7 SEQ#   1 LEN  508 FLAGS 1
+SEND MSG#  11 SEQ#   1 LEN  508 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+SEND MSG#  12 SEQ#   1 LEN  508 FLAGS 1
 RECV          SEQ#   4 LEN   12 FLAGS 3
-SEND MSG#   8 SEQ#   6 LEN  508 FLAGS 1 - DROPPED
+SEND MSG#  13 SEQ#   6 LEN  508 FLAGS 1
+(Pid: 925) Select Timed Out
+RECV          SEQ#   5 LEN   12 FLAGS 4
+SEND MSG#  14 SEQ#   2 LEN  508 FLAGS 1 - FLIPPED BITS
 
-(Pid: 4016) Select Timed Out
-(Pid: 4016) Select Timed Out
-SEND MSG#   9 SEQ#   2 LEN  508 FLAGS 1 - DROPPED
-
-(Pid: 4016) Select Timed Out
-SEND MSG#  10 SEQ#   2 LEN  508 FLAGS 1
-RECV          SEQ#   5 LEN   12 FLAGS 3
-SEND MSG#  11 SEQ#   7 LEN  508 FLAGS 1 - FLIPPED BITS
-
-(Pid: 4016) Select Timed Out
 RECV          SEQ#   6 LEN   12 FLAGS 4
+(Pid: 925) Select Timed Out
+SEND MSG#  15 SEQ#   2 LEN  508 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+SEND MSG#  16 SEQ#   2 LEN  508 FLAGS 1
+RECV          SEQ#   7 LEN   12 FLAGS 3
+SEND MSG#  17 SEQ#   7 LEN  508 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+SEND MSG#  18 SEQ#   8 LEN  504 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+(Pid: 925) Select Timed Out
+SEND MSG#  19 SEQ#   7 LEN  508 FLAGS 1
+RECV          SEQ#   8 LEN   12 FLAGS 3
+(Pid: 925) Select Timed Out
+SEND MSG#  20 SEQ#   8 LEN  504 FLAGS 1 - FLIPPED BITS
+
+RECV          SEQ#   9 LEN   12 FLAGS 4
+(Pid: 925) Select Timed Out
+SEND MSG#  21 SEQ#   8 LEN  504 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+SEND MSG#  22 SEQ#   8 LEN  504 FLAGS 1 - DROPPED
+
+(Pid: 925) Select Timed Out
+SEND MSG#  23 SEQ#   8 LEN  504 FLAGS 1
+RECV          SEQ#  10 LEN   12 FLAGS 3
+SEND MSG#  24 SEQ#   9 LEN    9 FLAGS 9 - FLIPPED BITS
+
+RECV          SEQ#  11 LEN   12 FLAGS 4
+(Pid: 925) Select Timed Out
+SEND MSG#  25 SEQ#  10 LEN    9 FLAGS 9
+RECV          SEQ#  12 LEN    9 FLAGS 10
+SEND MSG#  26 SEQ#  11 LEN    9 FLAGS 11 - FLIPPED BITS
+
+======== SeqNo Report ========
+  Msgs (Total)       :    26
+  Msgs (Unique SeqNo):    12
+==============================
+
+STATE = FILENAME
+
+STATE = FILENAME
+
+STATE = FILENAME
+
+STATE = FILENAME
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 6
+
+Added new window node 1
+Sending data packet. Length: 500. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 6
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 500. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 6
+1 : 0 
+1 
+2 :  149 
+
+Added new window node 3
+Sending data packet. Length: 500. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+
+Added new window node 4
+Sending data packet. Length: 500. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+
+Added new window node 5
+Sending data packet. Length: 500. Sequence: 5
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 1
+Removing window nodes below 1
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+Sending SREJ data packet. Length: 500. Sequence: 1
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 6. Upper: 6
+1 : 0 
+1 
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 508
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 6. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 6. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+
+Added new window node 6
+Sending data packet. Length: 500. Sequence: 6
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 2
+Removing window nodes below 2
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+Sending SREJ data packet. Length: 500. Sequence: 2
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 7. Upper: 7
+2 :  149 
+3 :  
+271
+4 : 2 393
+5 : 4 515
+6 : 6 637
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 508
+Attempt 2. Resent packet 2. Length: 508
+Received Something. Processing it
+Received RR. Val: 7
+Removing window nodes below 7
+Removing node at index 2
+Removing node at index 3
+Removing node at index 4
+Removing node at index 5
+Removing node at index 6
+Printing Window...
+Bottom: 7. Lower: 7. Upper: 12
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 7. Lower: 7. Upper: 12
+
+Added new window node 7
+Sending data packet. Length: 500. Sequence: 7
+Printing Window...
+Bottom: 7. Lower: 8. Upper: 12
+7 : 8 759
+
+Read < Buffer. Set final packet number to 8 
+Added new window node 8
+Sending data packet. Length: 496. Sequence: 8
+Printing Window...
+Bottom: 7. Lower: 9. Upper: 12
+7 : 8 759
+8 : 0 
+88
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 7. Length: 508
+Received Something. Processing it
+Received RR. Val: 8
+Removing window nodes below 8
+Removing node at index 7
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 13
+8 : 0 
+88
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 13
+8 : 0 
+88
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 8. Length: 504
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 13
+8 : 0 
+88
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 8. Length: 504
+Attempt 2. Resent packet 8. Length: 504
+Attempt 3. Resent packet 8. Length: 504
+Received Something. Processing it
+Received RR. Val: 9
+Removing window nodes below 9
+Removing node at index 8
+Printing Window...
+Bottom: 9. Lower: 9. Upper: 14
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 9. Lower: 9. Upper: 14
+
+
+STATE = SEND_EOF
+Attempt 2. Resending EOF Packet
+Received ACK_EOF. Sending FINAL_OK. DONE!
+Send Err-INIT ErrRate: 0.60 Drop: Y Flip: Y Rand: Y Debug: Y
+SEND MSG#   1 SEQ#   0 LEN   37 FLAGS 6
+RECV          SEQ#   0 LEN    8 FLAGS 7
+SEND MSG#   2 SEQ#   1 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+(Pid: 1016) Select Timed Out
+SEND MSG#   3 SEQ#   1 LEN  408 FLAGS 1
+RECV          SEQ#   1 LEN   12 FLAGS 3
+SEND MSG#   4 SEQ#   2 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+(Pid: 1016) Select Timed Out
+SEND MSG#   5 SEQ#   2 LEN  408 FLAGS 1
+RECV          SEQ#   2 LEN   12 FLAGS 3
+SEND MSG#   6 SEQ#   3 LEN  408 FLAGS 1
+(Pid: 1016) Select Timed Out
+RECV          SEQ#   3 LEN   12 FLAGS 3
+SEND MSG#   7 SEQ#   4 LEN  408 FLAGS 1 - FLIPPED BITS
+
+(Pid: 1016) Select Timed Out
+RECV          SEQ#   4 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#   8 SEQ#   4 LEN  408 FLAGS 1
+RECV          SEQ#   5 LEN   12 FLAGS 3
+SEND MSG#   9 SEQ#   5 LEN  408 FLAGS 1
+(Pid: 1016) Select Timed Out
+RECV          SEQ#   6 LEN   12 FLAGS 3
+SEND MSG#  10 SEQ#   6 LEN  408 FLAGS 1 - FLIPPED BITS
+
+(Pid: 1016) Select Timed Out
+RECV          SEQ#   7 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  11 SEQ#   6 LEN  408 FLAGS 1 - FLIPPED BITS
+
+RECV          SEQ#   8 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  12 SEQ#   6 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+SEND MSG#  13 SEQ#   6 LEN  408 FLAGS 1 - FLIPPED BITS
+
+RECV          SEQ#   9 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  14 SEQ#   6 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+SEND MSG#  15 SEQ#   6 LEN  408 FLAGS 1
+RECV          SEQ#  10 LEN   12 FLAGS 3
+SEND MSG#  16 SEQ#   7 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+(Pid: 1016) Select Timed Out
+SEND MSG#  17 SEQ#   7 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+SEND MSG#  18 SEQ#   7 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+SEND MSG#  19 SEQ#   7 LEN  408 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+SEND MSG#  20 SEQ#   7 LEN  408 FLAGS 1 - FLIPPED BITS
+
+RECV          SEQ#  11 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  21 SEQ#   7 LEN  408 FLAGS 1 - FLIPPED BITS
+
+RECV          SEQ#  12 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  22 SEQ#   7 LEN  408 FLAGS 1
+RECV          SEQ#  13 LEN   12 FLAGS 3
+SEND MSG#  23 SEQ#   8 LEN  408 FLAGS 1 - FLIPPED BITS
+
+(Pid: 1016) Select Timed Out
+RECV          SEQ#  14 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  24 SEQ#   8 LEN  408 FLAGS 1
+RECV          SEQ#  15 LEN   12 FLAGS 3
+SEND MSG#  25 SEQ#   9 LEN  408 FLAGS 1 - FLIPPED BITS
+
+(Pid: 1016) Select Timed Out
+RECV          SEQ# 239 LEN   12 FLAGS 4
+(Pid: 1016) Select Timed Out
+SEND MSG#  26 SEQ#   9 LEN  408 FLAGS 1
+RECV          SEQ#  17 LEN   12 FLAGS 3
+SEND MSG#  27 SEQ#  10 LEN  404 FLAGS 1 - DROPPED
+
+(Pid: 1016) Select Timed Out
+(Pid: 1016) Select Timed Out
+SEND MSG#  28 SEQ#  10 LEN  404 FLAGS 1
+RECV          SEQ#  18 LEN   12 FLAGS 3
+SEND MSG#  29 SEQ#  11 LEN    9 FLAGS 9
+RECV          SEQ#  19 LEN    9 FLAGS 10
+SEND MSG#  30 SEQ#  12 LEN    9 FLAGS 11
+======== SeqNo Report ========
+  Msgs (Total)       :    30
+  Msgs (Unique SeqNo):    13
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 2
+
+Added new window node 1
+Sending data packet. Length: 400. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 2
+1 : 0 
+1 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 1. Length: 408
+Received Something. Processing it
+Received RR. Val: 2
+Removing window nodes below 2
+Removing node at index 1
+Printing Window...
+Bottom: 2. Lower: 2. Upper: 3
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 2. Lower: 2. Upper: 3
+
+Added new window node 2
+Sending data packet. Length: 400. Sequence: 2
+Printing Window...
+Bottom: 2. Lower: 3. Upper: 3
+2 : 24 12
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 2. Length: 408
+Received Something. Processing it
+Received RR. Val: 3
+Removing window nodes below 3
+Removing node at index 2
+Printing Window...
+Bottom: 3. Lower: 3. Upper: 4
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 3. Lower: 3. Upper: 4
+
+Added new window node 3
+Sending data packet. Length: 400. Sequence: 3
+Printing Window...
+Bottom: 3. Lower: 4. Upper: 4
+3 :  222 
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 4
+Removing window nodes below 4
+Removing node at index 3
+Printing Window...
+Bottom: 4. Lower: 4. Upper: 5
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 4. Lower: 4. Upper: 5
+
+Added new window node 4
+Sending data packet. Length: 400. Sequence: 4
+Printing Window...
+Bottom: 4. Lower: 5. Upper: 5
+4 : 9 320
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 4. Lower: 5. Upper: 5
+4 : 9 320
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 4. Length: 408
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 6
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 6
+
+Added new window node 5
+Sending data packet. Length: 400. Sequence: 5
+Printing Window...
+Bottom: 5. Lower: 6. Upper: 6
+5 : 417 4
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 6
+Removing window nodes below 6
+Removing node at index 5
+Printing Window...
+Bottom: 6. Lower: 6. Upper: 7
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 6. Lower: 6. Upper: 7
+
+Added new window node 6
+Sending data packet. Length: 400. Sequence: 6
+Printing Window...
+Bottom: 6. Lower: 7. Upper: 7
+6 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 6. Lower: 7. Upper: 7
+6 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 6. Length: 408
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 6. Lower: 7. Upper: 7
+6 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 6. Length: 408
+Attempt 2. Resent packet 6. Length: 408
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 6. Lower: 7. Upper: 7
+6 : 4 515
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 6. Length: 408
+Attempt 2. Resent packet 6. Length: 408
+Received Something. Processing it
+Received RR. Val: 7
+Removing window nodes below 7
+Removing node at index 6
+Printing Window...
+Bottom: 7. Lower: 7. Upper: 8
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 7. Lower: 7. Upper: 8
+
+Added new window node 7
+Sending data packet. Length: 400. Sequence: 7
+Printing Window...
+Bottom: 7. Lower: 8. Upper: 8
+7 : 612 6
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 7. Length: 408
+Attempt 2. Resent packet 7. Length: 408
+Attempt 3. Resent packet 7. Length: 408
+Attempt 4. Resent packet 7. Length: 408
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 7. Lower: 8. Upper: 8
+7 : 612 6
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 7. Length: 408
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 7. Lower: 8. Upper: 8
+7 : 612 6
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 7. Length: 408
+Received Something. Processing it
+Received RR. Val: 8
+Removing window nodes below 8
+Removing node at index 7
+Printing Window...
+Bottom: 8. Lower: 8. Upper: 9
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 8. Upper: 9
+
+Added new window node 8
+Sending data packet. Length: 400. Sequence: 8
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 9
+8 :  710 
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 8. Lower: 9. Upper: 9
+8 :  710 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 8. Length: 408
+Received Something. Processing it
+Received RR. Val: 9
+Removing window nodes below 9
+Removing node at index 8
+Printing Window...
+Bottom: 9. Lower: 9. Upper: 10
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 9. Lower: 9. Upper: 10
+
+Added new window node 9
+Sending data packet. Length: 400. Sequence: 9
+Printing Window...
+Bottom: 9. Lower: 10. Upper: 10
+9 : 07 80
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+*** CRC_ERROR in process acks. Ignoring it ***
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 9. Lower: 10. Upper: 10
+9 : 07 80
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 9. Length: 408
+Received Something. Processing it
+Received RR. Val: 10
+Removing window nodes below 10
+Removing node at index 9
+Printing Window...
+Bottom: 10. Lower: 10. Upper: 11
+
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 10. Lower: 10. Upper: 11
+
+Read < Buffer. Set final packet number to 10 
+Added new window node 10
+Sending data packet. Length: 396. Sequence: 10
+Printing Window...
+Bottom: 10. Lower: 11. Upper: 11
+10 :  905 
+
+
+STATE = WINDOW_CLOSED
+Attempt 1. Resent packet 10. Length: 404
+Received Something. Processing it
+Received RR. Val: 11
+Removing window nodes below 11
+Removing node at index 10
+Printing Window...
+Bottom: 11. Lower: 11. Upper: 12
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 11. Lower: 11. Upper: 12
+
+
+STATE = SEND_EOF
+Received ACK_EOF. Sending FINAL_OK. DONE!
+Send Err-INIT ErrRate: 0.50 Drop: Y Flip: Y Rand: Y Debug: Y
+SEND MSG#   1 SEQ#   0 LEN   37 FLAGS 6
+RECV          SEQ#   0 LEN    8 FLAGS 7
+SEND MSG#   2 SEQ#   1 LEN 1008 FLAGS 1 - FLIPPED BITS
+
+(Pid: 1117) Select Timed Out
+SEND MSG#   3 SEQ#   2 LEN 1008 FLAGS 1
+(Pid: 1117) Select Timed Out
+SEND MSG#   4 SEQ#   3 LEN 1008 FLAGS 1
+(Pid: 1117) Select Timed Out
+SEND MSG#   5 SEQ#   4 LEN 1004 FLAGS 1
+(Pid: 1117) Select Timed Out
+RECV          SEQ#   1 LEN   12 FLAGS 4
+RECV          SEQ#   2 LEN   12 FLAGS 4
+SEND MSG#   6 SEQ#   1 LEN 1008 FLAGS 1
+RECV          SEQ#   3 LEN   12 FLAGS 3
+SEND MSG#   7 SEQ#   5 LEN    9 FLAGS 9 - DROPPED
+
+(Pid: 1117) Select Timed Out
+SEND MSG#   8 SEQ#   6 LEN    9 FLAGS 9 - FLIPPED BITS
+
+RECV          SEQ#   4 LEN   12 FLAGS 4
+(Pid: 1117) Select Timed Out
+SEND MSG#   9 SEQ#   7 LEN    9 FLAGS 9
+RECV          SEQ#   5 LEN    9 FLAGS 10
+SEND MSG#  10 SEQ#   8 LEN    9 FLAGS 11
+======== SeqNo Report ========
+  Msgs (Total)       :    10
+  Msgs (Unique SeqNo):     9
+==============================
+
+STATE = FILENAME
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 1. Upper: 101
+
+Added new window node 1
+Sending data packet. Length: 1000. Sequence: 1
+Printing Window...
+Bottom: 1. Lower: 2. Upper: 101
+1 : 0 
+1 
+
+Added new window node 2
+Sending data packet. Length: 1000. Sequence: 2
+Printing Window...
+Bottom: 1. Lower: 3. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+
+Added new window node 3
+Sending data packet. Length: 1000. Sequence: 3
+Printing Window...
+Bottom: 1. Lower: 4. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+
+Read < Buffer. Set final packet number to 4 
+Added new window node 4
+Sending data packet. Length: 996. Sequence: 4
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 0
+Received invalid SREJ 0
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received SREJ. Val: 1
+Removing window nodes below 1
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+Sending SREJ data packet. Length: 1000. Sequence: 1
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 1. Lower: 5. Upper: 101
+1 : 0 
+1 
+2 :  
+271
+3 : 4 515
+4 : 8 759
+
+
+STATE = WINDOW_CLOSED
+Received Something. Processing it
+Received RR. Val: 5
+Removing window nodes below 5
+Removing node at index 1
+Removing node at index 2
+Removing node at index 3
+Removing node at index 4
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 105
+
+Recieved final RR. Setting var
+
+STATE = WINDOW_OPEN
+Printing Window...
+Bottom: 5. Lower: 5. Upper: 105
+
+
+STATE = SEND_EOF
+Attempt 1. Resending EOF Packet
+Attempt 3. Resending EOF Packet
+Received ACK_EOF. Sending FINAL_OK. DONE!
