@@ -1,0 +1,73 @@
+Send Err-INIT ErrRate: 0.00 Drop: Y Flip: Y Rand: Y Debug: Y
+SEND MSG#   1 SEQ#   0 LEN   38 FLAGS 6
+RECV          SEQ#   0 LEN    8 FLAGS 2
+SEND MSG#   2 SEQ#   1 LEN  508 FLAGS 1
+(Pid: 31157) Select Timed Out
+SEND MSG#   3 SEQ#   2 LEN  508 FLAGS 1
+(Pid: 31157) Select Timed Out
+SEND MSG#   4 SEQ#   3 LEN  508 FLAGS 1
+(Pid: 31157) Select Timed Out
+SEND MSG#   5 SEQ#   4 LEN  508 FLAGS 1
+(Pid: 31157) Select Timed Out
+SEND MSG#   6 SEQ#   5 LEN  508 FLAGS 1
+(Pid: 31157) Select Timed Out
+RECV          SEQ#   3 LEN   12 FLAGS 4
+SEND MSG#   7 SEQ#   4 LEN  508 FLAGS 1
+SEND MSG#   8 SEQ#   6 LEN  508 FLAGS 1
+RECV          SEQ#   4 LEN   12 FLAGS 4
+RECV          SEQ#   5 LEN   12 FLAGS 4
+(Pid: 31157) Select Timed Out
+SEND MSG#   9 SEQ#   7 LEN  508 FLAGS 1
+RECV          SEQ#   6 LEN   12 FLAGS 4
+SEND MSG#  10 SEQ#   6 LEN  508 FLAGS 1
+RECV          SEQ#   7 LEN   12 FLAGS 4
+RECV          SEQ#   8 LEN   12 FLAGS 4
+(Pid: 31157) Select Timed Out
+SEND MSG#  11 SEQ#   8 LEN  504 FLAGS 1
+RECV          SEQ#   9 LEN   12 FLAGS 4
+SEND MSG#  12 SEQ#   8 LEN  504 FLAGS 1
+(Pid: 31157) Select Timed Out
+RECV          SEQ# 244 LEN   12 FLAGS 4
+(Pid: 31157) Select Timed Out
+SEND MSG#  13 SEQ#   8 LEN  504 FLAGS 1
+RECV          SEQ# 65292 LEN   12 FLAGS 4
+(Pid: 31157) Select Timed Out
+SEND MSG#  14 SEQ#   8 LEN  504 FLAGS 1
+(Pid: 31157) Select Timed Out
+SEND MSG#  15 SEQ#   8 LEN  504 FLAGS 1
+RECV          SEQ#  14 LEN   12 FLAGS 4
+Send Err-INIT ErrRate: 0.20 Drop: Y Flip: Y Rand: Y Debug: Y
+SEND MSG#   1 SEQ#   0 LEN   38 FLAGS 6
+RECV          SEQ#   0 LEN    8 FLAGS 2
+SEND MSG#   2 SEQ#   1 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+SEND MSG#   3 SEQ#   2 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+SEND MSG#   4 SEQ#   3 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+SEND MSG#   5 SEQ#   4 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+SEND MSG#   6 SEQ#   5 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+RECV          SEQ#   3 LEN   12 FLAGS 4
+SEND MSG#   7 SEQ#   4 LEN  508 FLAGS 1 - DROPPED
+
+SEND MSG#   8 SEQ#   6 LEN  508 FLAGS 1
+RECV          SEQ#   4 LEN   12 FLAGS 4
+RECV          SEQ#   5 LEN   12 FLAGS 4
+(Pid: 31177) Select Timed Out
+SEND MSG#   9 SEQ#   7 LEN  508 FLAGS 1
+RECV          SEQ#   6 LEN   12 FLAGS 4
+SEND MSG#  10 SEQ#   7 LEN  508 FLAGS 1
+RECV          SEQ#   7 LEN   12 FLAGS 4
+(Pid: 31177) Select Timed Out
+SEND MSG#  11 SEQ#   8 LEN  504 FLAGS 1 - FLIPPED BITS
+
+(Pid: 31177) Select Timed Out
+RECV          SEQ#   8 LEN   12 FLAGS 4
+RECV          SEQ#   8 LEN   12 FLAGS 5
+(Pid: 31177) Select Timed Out
+SEND MSG#  12 SEQ#   7 LEN  508 FLAGS 1
+(Pid: 31177) Select Timed Out
+SEND MSG#  13 SEQ#   7 LEN  508 FLAGS 1 - DROPPED
+

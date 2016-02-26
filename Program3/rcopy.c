@@ -6,7 +6,7 @@
  *     
  * Lance Boettcher
  * ******************************************************************************/
-
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 void initRCopy(int argc, char *argv[]) {
    /* Initialize sendtoErr */
-   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_ON);
+   sendtoErr_init(atof(argv[4]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON);
 
    /* Init sequence number */
    rcopy.sequence = START_SEQ_NUM;

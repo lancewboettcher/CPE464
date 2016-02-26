@@ -6,7 +6,7 @@
  *
  * Lance Boettcher
  ******************************************************************************/
-
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -44,7 +44,7 @@ void initServer(int argc, char *argv[]) {
          exit(-1);
       }
 
-      sendtoErr_init(atof(argv[1]), DROP_ON, FLIP_ON, DEBUG_OFF, RSEED_ON); 
+      sendtoErr_init(atof(argv[1]), DROP_ON, FLIP_ON, DEBUG_ON, RSEED_ON); 
    }
    else {
       perror("Usage: server <Error Percent> <Port Number (Optional)>");
@@ -200,7 +200,7 @@ STATE recv_data(int32_t output_file, Connection *client) {
  
       *((int32_t *) sendBuffer) = seq_num;
       sendLength = send_buf(sendBuffer, sizeof(int32_t), client, SREJ, 
-            window.bottom, sendPacket);
+            server.sequence++, sendPacket);
 
       return RECV_DATA;
    }

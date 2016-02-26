@@ -1,0 +1,10 @@
+Send Err-INIT ErrRate: 0.00 Drop: Y Flip: Y Rand: Y Debug: Y
+SEND MSG#   1 SEQ#   0 LEN   38 FLAGS 6
+RECV          SEQ#   0 LEN    8 FLAGS 2
+SEND MSG#   2 SEQ#   1 LEN  508 FLAGS 1
+(Pid: 31160) Select Timed Out
+(Pid: 31160) Select Timed Out
+SEND MSG#   3 SEQ#   1 LEN  508 FLAGS 1
+(Pid: 31160) Select Timed Out
+SEND MSG#   4 SEQ#   1 LEN  508 FLAGS 1
+RECV          SEQ#   3 LEN   12 FLAGS 4
